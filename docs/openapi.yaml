@@ -69,7 +69,7 @@ paths:
           description: The virtual machine ID to be deleted.
           required: true
           schema:
-            type: integer
+            type: string
       responses:
         '200':
           description: Successful deleted virtual machine by ID.
@@ -208,7 +208,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
       requestBody:
         content:
           application/json:
@@ -245,6 +245,7 @@ paths:
       parameters:
         - name: vm_id
           in: path
+          description: The virtual machine ID which installed software to be deleted.
           required: true
           schema:
             type: integer
@@ -266,7 +267,7 @@ components:
     VirtualMachine:
       properties:
         vm_id:
-          type: integer
+          type: string
         vm_name:
           type: string
         vm_os:
@@ -309,8 +310,7 @@ components:
     Installation:
       properties:
         vm_id: 
-          type: integer
-          format: int32
+          type: string
         creation_time:
           type: string
           format: datetime
