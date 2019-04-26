@@ -10,6 +10,7 @@ import (
 	"github.com/inspursoft/itpserver/services"
 )
 
+// Operations about vm
 type VMController struct {
 	beego.Controller
 }
@@ -23,6 +24,7 @@ type VMController struct {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
+// @router / [get]
 func (v *VMController) Get() {
 	vmName := v.GetString("name", "")
 	vmHandler := services.NewVMHandler()
@@ -40,6 +42,7 @@ func (v *VMController) Get() {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
+// @router / [post]
 func (v *VMController) Post() {
 	var vm models.VM
 	err := json.Unmarshal(v.Ctx.Input.RequestBody, &vm)
@@ -61,7 +64,7 @@ func (v *VMController) Post() {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @Router /:vm_id [get]
+// @router /:vm_id [get]
 func (v *VMController) Delete() {
 	vmID := v.GetString("vm_id", "")
 	status := services.NewVMHandler().Delete(vmID)

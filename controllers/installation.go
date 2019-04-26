@@ -23,6 +23,7 @@ type InstallationController struct {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
+// @router / [get]
 func (ic *InstallationController) Get() {
 	vmName := ic.GetString("vm_name", "")
 	handler := services.NewInstallationHandler()
@@ -40,7 +41,7 @@ func (ic *InstallationController) Get() {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @Router /:vm_id [get]
+// @router /:vm_id [get]
 func (ic *InstallationController) Post() {
 	vmID := ic.GetString(":vm_id")
 	var pkgs []models.Package
@@ -64,7 +65,7 @@ func (ic *InstallationController) Post() {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @Router /:vm_id [get]
+// @router /:vm_id [get]
 func (ic *InstallationController) Delete() {
 	vmID := ic.GetString(":vm_id")
 	handler := services.NewInstallationHandler()

@@ -23,11 +23,12 @@ type PackagesController struct {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
+// @router / [get]
 func (pc *PackagesController) Get() {
 	pkgName := pc.GetString("name", "")
 	handler := services.NewPackageHandler()
-	packages := handler.Get(pkgName)
-	pc.Data["JSON"] = packages
+	pkgs := handler.Get(pkgName)
+	pc.Data["JSON"] = pkgs
 	pc.ServeJSON()
 }
 
@@ -40,6 +41,7 @@ func (pc *PackagesController) Get() {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
+// @router / [post]
 func (pc *PackagesController) Post() {
 	var pkg models.Package
 	err := json.Unmarshal(pc.Ctx.Input.RequestBody, &pkg)
@@ -63,6 +65,7 @@ func (pc *PackagesController) Post() {
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
+// @router / [delete]
 func (pc *PackagesController) Delete() {
 	pkgName := pc.GetString("package_name", "")
 	pkgTag := pc.GetString("package_tag", "")
