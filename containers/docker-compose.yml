@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  postgredb:
+    build:
+      context: ../
+      dockerfile: ./containers/db/Dockerfile
+    # configs:
+    #   - source: init-db
+    #     target: /docker-entrypoint-initdb.d/init-db.sh
+    #     uid: '103'
+    #     gid: '103'
+    #     mode: 0770
+    env_file:
+      - ../conf/db/db.env
+    volumes:
+      - /Users/wangkun/data/itp-db:/var/lib/postgresql/data
+    networks:
+      itp:
+        aliases: 
+          - postgredb
+    ports:
+      - "8882:5432"
+  apiserver:
+    build:
+      context: ../
+      dockerfile: ./containers/apiserver/Dockerfile
+    depends_on:
+      - postgredb
+    networks:
+      - itp
+configs:
+  init-db:
+    file: ./containers/db/init-db.sh
+networks:
+  itp:

@@ -1,4 +1,5 @@
-.DSStore
+.DS_Store
 itpserver
 *.tmp
-routers/*_controllers.go
+src/apiserver/routers/*_controllers.go
+src/apiserver/apiserver
