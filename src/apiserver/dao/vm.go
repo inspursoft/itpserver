@@ -39,18 +39,24 @@ func (v *vmDaoHandler) GetVM(vmID ...string) ([]models.VM, error) {
 		q.Filter("vm_id", vmID)
 	}
 	var results []models.VM
-	q.All(&results)
-	beego.Info(fmt.Sprintf("Succesful got VM(s) with VM ID: %+v", results))
+	count, err := q.All(&results)
+	if err != nil {
+		return nil, err
+	}
+	beego.Info(fmt.Sprintf("Succesful got %d VM(s) with VM ID: %+v", count, results))
 	return results, nil
 }
 
-func (v *vmDaoHandler) GetVMSpec(vmID string) (models.VMSpec, error) {
+func (v *vmDaoHandler) GetVMSpec(vmID string) (*models.VMSpec, error) {
 	var vmSpec models.VMSpec
 	o := orm.NewOrm()
 	err := o.QueryTable("vm_spec").RelatedSel().Filter("vm__vm_id", vmID).
 		One(&vmSpec)
+	if err != nil {
+		return nil, err
+	}
 	beego.Info(fmt.Sprintf("Successful got VM Spec %+v with VM ID: %s", vmSpec, vmID))
-	return vmSpec, err
+	return &vmSpec, err
 }
 
 func (v *vmDaoHandler) UpdateVM(vm models.VM) (affected int64, err error) {
@@ -61,6 +67,10 @@ func (v *vmDaoHandler) UpdateVM(vm models.VM) (affected int64, err error) {
 				"vm_name": vm.Name,
 				"vm_os":   vm.OS,
 			})
+	if err != nil {
+		affected = 0
+		return
+	}
 	beego.Info(fmt.Sprintf("Successful update VM %d item(s) with VM ID: %s", affected, vm.VMID))
 	return
 }
@@ -75,6 +85,10 @@ func (v *vmDaoHandler) UpdateVMSpec(vm models.VM, spec models.VMSpec) (affected 
 				"storage": spec.Storage,
 				"extras":  spec.Extras,
 			})
+	if err != nil {
+		affected = 0
+		return
+	}
 	beego.Info(fmt.Sprintf("Successful update VM Spec %d item(s) with VM ID: %s", affected, vm.VMID))
 	return
 }
@@ -82,6 +96,10 @@ func (v *vmDaoHandler) UpdateVMSpec(vm models.VM, spec models.VMSpec) (affected 
 func (v *vmDaoHandler) DeleteVM(vmID string) (affected int64, err error) {
 	o := orm.NewOrm()
 	affected, err = o.QueryTable("vm").Filter("vm_id", vmID).Delete()
+	if err != nil {
+		affected = 0
+		return
+	}
 	beego.Info(fmt.Sprintf("Successful deleted %d item(s) with VM ID: %s", affected, vmID))
 	return
 }
