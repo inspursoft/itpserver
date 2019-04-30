@@ -8,32 +8,38 @@ import (
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
 
-type installationDaoHandler int
+type InstallationDaoHandler int
 
-func NewInstallationDaoHandler() *installationDaoHandler {
-	return new(installationDaoHandler)
-}
-
-func InstallPackageToVM(vm models.VM, pkg models.Package) (affected int64, err error) {
+func (ins *InstallationDaoHandler) GetInstallPackages(vmID string) (pkgList []models.Package, err error) {
 	o := orm.NewOrm()
-	m2m := o.QueryM2M(&vm, "packages")
-	affected, err = m2m.Add(&pkg)
+	count, err := o.QueryTable("package").Filter("VMs__VM__VMID", vmID).All(&pkgList)
 	if err != nil {
-		affected = 0
 		return
 	}
-	beego.Info(fmt.Sprintf("Successful inserted package %v to VM: %v", pkg, vm))
+	beego.Info(fmt.Sprintf("Successful got %d package(s) from VM with ID: %s", count, vmID))
 	return
 }
 
-func RemovePackageFromVM(vm models.VM, pkg models.Package) (affected int64, err error) {
+func (ins *InstallationDaoHandler) InstallPackageToVM(vm *models.VM, pkg *models.Package) (affected int64, err error) {
 	o := orm.NewOrm()
-	m2m := o.QueryM2M(&vm, "packages")
-	affected, err = m2m.Remove(&pkg)
+	m2m := o.QueryM2M(vm, "packages")
+	affected, err = m2m.Add(pkg)
 	if err != nil {
 		affected = 0
 		return
 	}
-	beego.Info(fmt.Sprintf("Successful removed package %v to VM: %v", pkg, vm))
+	beego.Info(fmt.Sprintf("Successful inserted package %v to VM: %v", *pkg, *vm))
+	return
+}
+
+func (ins *InstallationDaoHandler) RemovePackageFromVM(vm *models.VM, pkg *models.Package) (affected int64, err error) {
+	o := orm.NewOrm()
+	m2m := o.QueryM2M(vm, "packages")
+	affected, err = m2m.Remove(pkg)
+	if err != nil {
+		affected = 0
+		return
+	}
+	beego.Info(fmt.Sprintf("Successful removed package %v to VM: %v", *pkg, *vm))
 	return
 }

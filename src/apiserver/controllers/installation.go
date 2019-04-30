@@ -25,9 +25,12 @@ type InstallationController struct {
 // @Failure 500 Internal error occurred at server side.
 // @router / [get]
 func (ic *InstallationController) Get() {
-	vmName := ic.GetString("vm_name", "")
+	vmID := ic.GetString("vm_id", "")
 	handler := services.NewInstallationHandler()
-	installations := handler.Get(vmName)
+	installations, err := handler.GetInstalledPackages(vmID)
+	if err != nil {
+		ic.CustomAbort(http.StatusInternalServerError, "Failed to get installed packages.")
+	}
 	ic.Data["JSON"] = installations
 	ic.ServeJSON()
 }
@@ -44,13 +47,16 @@ func (ic *InstallationController) Get() {
 // @router /:vm_id [get]
 func (ic *InstallationController) Post() {
 	vmID := ic.GetString(":vm_id")
-	var pkgs []models.Package
-	err := json.Unmarshal(ic.Ctx.Input.RequestBody, &pkgs)
+	var pkg models.Package
+	err := json.Unmarshal(ic.Ctx.Input.RequestBody, &pkg)
 	if err != nil {
 		ic.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
 	}
 	handler := services.NewInstallationHandler()
-	status := handler.Install(vmID, pkgs)
+	status, err := handler.Install(vmID, pkg)
+	if err != nil {
+		ic.CustomAbort(http.StatusInternalServerError, "Failed to install package.")
+	}
 	if !status {
 		ic.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to create packages to VM ID: %s", vmID))
 	}
@@ -68,8 +74,16 @@ func (ic *InstallationController) Post() {
 // @router /:vm_id [get]
 func (ic *InstallationController) Delete() {
 	vmID := ic.GetString(":vm_id")
+	var pkg models.Package
+	err := json.Unmarshal(ic.Ctx.Input.RequestBody, &pkg)
+	if err != nil {
+		ic.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
+	}
 	handler := services.NewInstallationHandler()
-	status := handler.Delete(vmID)
+	status, err := handler.Delete(vmID, pkg)
+	if err != nil {
+		ic.CustomAbort(http.StatusInternalServerError, "Failed to delete package.")
+	}
 	if !status {
 		ic.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to delete package to VM ID: %s", vmID))
 	}

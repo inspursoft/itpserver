@@ -28,7 +28,10 @@ type VMController struct {
 func (v *VMController) Get() {
 	vmName := v.GetString("name", "")
 	vmHandler := services.NewVMHandler()
-	vms := vmHandler.Get(vmName)
+	vms, err := vmHandler.Get(vmName)
+	if err != nil {
+		v.CustomAbort(http.StatusInternalServerError, "Failed to get VM list.")
+	}
 	v.Data["JSON"] = vms
 	v.ServeJSON()
 }
@@ -49,7 +52,15 @@ func (v *VMController) Post() {
 	if err != nil {
 		v.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
 	}
-	status := services.NewVMHandler().Create(&vm)
+	var spec models.VMSpec
+	err = json.Unmarshal(v.Ctx.Input.RequestBody, &spec)
+	if err != nil {
+		v.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
+	}
+	status, err := services.NewVMHandler().Create(vm, spec)
+	if err != nil {
+		v.CustomAbort(http.StatusInternalServerError, "Failed to create VM.")
+	}
 	if !status {
 		v.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to create VM: %s", vm.Name))
 	}
@@ -67,7 +78,10 @@ func (v *VMController) Post() {
 // @router /:vm_id [get]
 func (v *VMController) Delete() {
 	vmID := v.GetString("vm_id", "")
-	status := services.NewVMHandler().Delete(vmID)
+	status, err := services.NewVMHandler().Delete(vmID)
+	if err != nil {
+		v.CustomAbort(http.StatusInternalServerError, "Failed to delete VM list.")
+	}
 	if !status {
 		v.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to delete VM by ID: %s", vmID))
 	}

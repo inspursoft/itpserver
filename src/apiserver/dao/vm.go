@@ -8,13 +8,9 @@ import (
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
 
-type vmDaoHandler int
+type VMDaoHandler int
 
-func NewVMDaoHandler() *vmDaoHandler {
-	return new(vmDaoHandler)
-}
-
-func (v *vmDaoHandler) AddVM(vm *models.VM, spec *models.VMSpec) (*models.VM, error) {
+func (v *VMDaoHandler) AddVM(vm *models.VM, spec *models.VMSpec) (*models.VM, error) {
 	o := orm.NewOrm()
 	id, err := o.Insert(vm)
 	if err != nil {
@@ -32,11 +28,11 @@ func (v *vmDaoHandler) AddVM(vm *models.VM, spec *models.VMSpec) (*models.VM, er
 	return vm, nil
 }
 
-func (v *vmDaoHandler) GetVM(vmID ...string) ([]models.VM, error) {
+func (v *VMDaoHandler) GetVM(vmID ...string) ([]models.VM, error) {
 	o := orm.NewOrm()
 	q := o.QueryTable("vm")
 	if vmID != nil {
-		q.Filter("vm_id", vmID)
+		q = q.Filter("vm_id", vmID)
 	}
 	var results []models.VM
 	count, err := q.All(&results)
@@ -47,7 +43,7 @@ func (v *vmDaoHandler) GetVM(vmID ...string) ([]models.VM, error) {
 	return results, nil
 }
 
-func (v *vmDaoHandler) GetVMSpec(vmID string) (*models.VMSpec, error) {
+func (v *VMDaoHandler) GetVMSpec(vmID string) (*models.VMSpec, error) {
 	var vmSpec models.VMSpec
 	o := orm.NewOrm()
 	err := o.QueryTable("vm_spec").RelatedSel().Filter("vm__vm_id", vmID).
@@ -59,7 +55,7 @@ func (v *vmDaoHandler) GetVMSpec(vmID string) (*models.VMSpec, error) {
 	return &vmSpec, err
 }
 
-func (v *vmDaoHandler) UpdateVM(vm models.VM) (affected int64, err error) {
+func (v *VMDaoHandler) UpdateVM(vm models.VM) (affected int64, err error) {
 	o := orm.NewOrm()
 	affected, err = o.QueryTable("vm").Filter("vm_id", vm.VMID).
 		Update(
@@ -75,7 +71,7 @@ func (v *vmDaoHandler) UpdateVM(vm models.VM) (affected int64, err error) {
 	return
 }
 
-func (v *vmDaoHandler) UpdateVMSpec(vm models.VM, spec models.VMSpec) (affected int64, err error) {
+func (v *VMDaoHandler) UpdateVMSpec(vm models.VM, spec models.VMSpec) (affected int64, err error) {
 	o := orm.NewOrm()
 	affected, err = o.QueryTable("vm_spec").RelatedSel().Filter("vm__vm_id", vm.VMID).
 		Update(
@@ -93,7 +89,7 @@ func (v *vmDaoHandler) UpdateVMSpec(vm models.VM, spec models.VMSpec) (affected 
 	return
 }
 
-func (v *vmDaoHandler) DeleteVM(vmID string) (affected int64, err error) {
+func (v *VMDaoHandler) DeleteVM(vmID string) (affected int64, err error) {
 	o := orm.NewOrm()
 	affected, err = o.QueryTable("vm").Filter("vm_id", vmID).Delete()
 	if err != nil {

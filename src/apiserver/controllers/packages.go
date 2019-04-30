@@ -27,7 +27,10 @@ type PackagesController struct {
 func (pc *PackagesController) Get() {
 	pkgName := pc.GetString("name", "")
 	handler := services.NewPackageHandler()
-	pkgs := handler.Get(pkgName)
+	pkgs, err := handler.Get(pkgName)
+	if err != nil {
+		pc.CustomAbort(http.StatusInternalServerError, "Failed to get package list.")
+	}
 	pc.Data["JSON"] = pkgs
 	pc.ServeJSON()
 }
@@ -49,7 +52,10 @@ func (pc *PackagesController) Post() {
 		pc.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
 	}
 	handler := services.NewPackageHandler()
-	status := handler.Create(&pkg)
+	status, err := handler.Create(pkg)
+	if err != nil {
+		pc.CustomAbort(http.StatusInternalServerError, "Failed to create package list.")
+	}
 	if !status {
 		pc.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to create package: %s", pkg.Name))
 	}
@@ -70,7 +76,10 @@ func (pc *PackagesController) Delete() {
 	pkgName := pc.GetString("package_name", "")
 	pkgTag := pc.GetString("package_tag", "")
 	handler := services.NewPackageHandler()
-	status := handler.Delete(pkgName, pkgTag)
+	status, err := handler.Delete(pkgName, pkgTag)
+	if err != nil {
+		pc.CustomAbort(http.StatusInternalServerError, "Failed to delete package.")
+	}
 	if !status {
 		pc.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to delete package: %s", pkgName))
 	}

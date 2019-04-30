@@ -1,23 +1,30 @@
 package services
 
-import "github.com/inspursoft/itpserver/src/apiserver/models"
+import (
+	"github.com/inspursoft/itpserver/src/apiserver/dao"
+	"github.com/inspursoft/itpserver/src/apiserver/models"
+)
 
-type installationConf struct{}
+type installationConf struct {
+	daoHandler dao.InstallationDaoHandler
+}
 
 func NewInstallationHandler() *installationConf {
-	return &installationConf{}
+	return new(installationConf)
 }
 
-func (ic *installationConf) Get(vmName string) []models.Installation {
-	return nil
+func (ic *installationConf) GetInstalledPackages(vmID string) ([]models.Package, error) {
+	return ic.daoHandler.GetInstallPackages(vmID)
 }
 
-func (ic *installationConf) Install(vmID string, packages []models.Package) (status bool) {
-	status = false
+func (ic *installationConf) Install(vmID string, pkg models.Package) (status bool, err error) {
+	affected, err := ic.daoHandler.InstallPackageToVM(&models.VM{VMID: vmID}, &pkg)
+	status = (affected == 1)
 	return
 }
 
-func (ic *installationConf) Delete(vmID string) (status bool) {
-	status = false
+func (ic *installationConf) Delete(vmID string, pkg models.Package) (status bool, err error) {
+	affected, err := ic.daoHandler.RemovePackageFromVM(&models.VM{VMID: vmID}, &pkg)
+	status = (affected == 1)
 	return
 }

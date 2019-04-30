@@ -8,17 +8,13 @@ import (
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
 
-type pkgDaoHandler int
+type PkgDaoHandler int
 
-func NewPkgDaoHandler() *pkgDaoHandler {
-	return new(pkgDaoHandler)
-}
-
-func (p *pkgDaoHandler) GetPackage(name ...string) ([]models.Package, error) {
+func (p *PkgDaoHandler) GetPackage(name ...string) ([]models.Package, error) {
 	o := orm.NewOrm()
 	q := o.QueryTable("package")
 	if name != nil {
-		q.Filter("name", name)
+		q = q.Filter("name", name)
 	}
 	var results []models.Package
 	count, err := q.All(&results)
@@ -30,20 +26,20 @@ func (p *pkgDaoHandler) GetPackage(name ...string) ([]models.Package, error) {
 
 }
 
-func (p *pkgDaoHandler) AddPackages(packages []models.Package) (affected int64, err error) {
+func (p *PkgDaoHandler) AddPackage(pkg *models.Package) (insertedID int64, err error) {
 	o := orm.NewOrm()
-	affected, err = o.InsertMulti(len(packages), packages)
+	insertedID, err = o.Insert(pkg)
 	if err != nil {
-		affected = 0
+		insertedID = 0
 		return
 	}
-	beego.Info(fmt.Sprintf("Successful inserted %d package(s).", len(packages)))
+	beego.Info(fmt.Sprintf("Successful inserted %d package(s).", insertedID))
 	return
 }
 
-func (p *pkgDaoHandler) DeletePackage(name string) (affected int64, err error) {
+func (p *PkgDaoHandler) DeletePackage(name string, tag string) (affected int64, err error) {
 	o := orm.NewOrm()
-	affected, err = o.QueryTable("package").Filter("name", name).Delete()
+	affected, err = o.QueryTable("package").Filter("name__exact", name).Filter("tag__exact", tag).Delete()
 	if err != nil {
 		affected = 0
 		return
@@ -52,7 +48,7 @@ func (p *pkgDaoHandler) DeletePackage(name string) (affected int64, err error) {
 	return
 }
 
-func (p *pkgDaoHandler) UpdatePackage(pkg models.Package) (affected int64, err error) {
+func (p *PkgDaoHandler) UpdatePackage(pkg models.Package) (affected int64, err error) {
 	o := orm.NewOrm()
 	affected, err = o.QueryTable("package").Filter("name", pkg.Name).Update(
 		orm.Params{

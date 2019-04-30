@@ -12,8 +12,8 @@ import (
 func TestOperateVM(t *testing.T) {
 	vm := models.VM{Name: "ubuntu-vm-1", VMID: "1a2b3c", OS: "CentOS"}
 	spec := models.VMSpec{CPUs: 2, Memory: "4Gb", Storage: "1T", Extras: "SSD"}
-	h := dao.NewVMDaoHandler()
-	t.Run("Create", func(t *testing.T) {
+	var h dao.VMDaoHandler
+	t.Run("CreateVM", func(t *testing.T) {
 		v, err := h.AddVM(&vm, &spec)
 		assert := assert.New(t)
 		assert.NotNil(v, "Got VM object after insertion.")
@@ -45,7 +45,7 @@ func TestOperateVM(t *testing.T) {
 		assert.Equal(int64(1), affected)
 		assert.Nil(err)
 	})
-	t.Run("Delete", func(t *testing.T) {
+	t.Run("DeleteVM", func(t *testing.T) {
 		affected, err := h.DeleteVM(vm.VMID)
 		assert := assert.New(t)
 		assert.Equal(int64(1), affected)

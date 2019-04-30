@@ -6,7 +6,7 @@ type VM struct {
 	Name     string     `json:"vm_name" orm:"column(vm_name)"`
 	OS       string     `json:"vm_os" orm:"column(vm_os)"`
 	Spec     *VMSpec    `json:"vm_spec" orm:"reverse(one);on_delete(cascade)"`
-	Packages []*Package `orm:"rel(m2m);rel_through(models.Installation)"`
+	Packages []*Package `orm:"rel(m2m);rel_through(github.com/inspursoft/itpserver/src/apiserver/models.Installation)"`
 }
 
 func (vm *VM) TableName() string {
