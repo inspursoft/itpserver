@@ -30,11 +30,6 @@ func init() {
 				&controllers.InstallationController{},
 			),
 		),
-		beego.NSNamespace("/install/:vm_id",
-			beego.NSInclude(
-				&controllers.InstallationController{},
-			),
-		),
 	)
 	beego.AddNamespace(ns)
 }

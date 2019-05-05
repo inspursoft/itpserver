@@ -20,15 +20,10 @@ func TestOperateVM(t *testing.T) {
 		assert.Nil(err)
 	})
 	t.Run("GetVM", func(t *testing.T) {
-		vms, err := h.GetVM()
+		vms, err := h.GetVM("1a2b3c")
 		assert := assert.New(t)
 		assert.Nil(err)
 		assert.NotNil(vms)
-	})
-	t.Run("GetVMSpec", func(t *testing.T) {
-		spec, err := h.GetVMSpec("1a2b3c")
-		assert := assert.New(t)
-		assert.Nil(err)
 		assert.NotNil(spec)
 	})
 	t.Run("UpdateVM", func(t *testing.T) {

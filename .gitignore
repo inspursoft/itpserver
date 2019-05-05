@@ -3,3 +3,4 @@ itpserver
 *.tmp
 src/apiserver/routers/*_controllers.go
 src/apiserver/apiserver
+src/apiserver/swagger

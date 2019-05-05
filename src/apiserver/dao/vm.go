@@ -28,31 +28,25 @@ func (v *VMDaoHandler) AddVM(vm *models.VM, spec *models.VMSpec) (*models.VM, er
 	return vm, nil
 }
 
-func (v *VMDaoHandler) GetVM(vmID ...string) ([]models.VM, error) {
+func (v *VMDaoHandler) GetVM(vmID string) ([]*models.VM, error) {
 	o := orm.NewOrm()
 	q := o.QueryTable("vm")
-	if vmID != nil {
+	if vmID != "" {
 		q = q.Filter("vm_id", vmID)
 	}
-	var results []models.VM
+	var results []*models.VM
 	count, err := q.All(&results)
 	if err != nil {
 		return nil, err
 	}
-	beego.Info(fmt.Sprintf("Succesful got %d VM(s) with VM ID: %+v", count, results))
-	return results, nil
-}
-
-func (v *VMDaoHandler) GetVMSpec(vmID string) (*models.VMSpec, error) {
-	var vmSpec models.VMSpec
-	o := orm.NewOrm()
-	err := o.QueryTable("vm_spec").RelatedSel().Filter("vm__vm_id", vmID).
-		One(&vmSpec)
+	for _, v := range results {
+		_, err = o.LoadRelated(v, "Spec")
+	}
 	if err != nil {
 		return nil, err
 	}
-	beego.Info(fmt.Sprintf("Successful got VM Spec %+v with VM ID: %s", vmSpec, vmID))
-	return &vmSpec, err
+	beego.Info(fmt.Sprintf("Succesful got %d VM(s) with spec", count))
+	return results, nil
 }
 
 func (v *VMDaoHandler) UpdateVM(vm models.VM) (affected int64, err error) {
@@ -64,6 +58,9 @@ func (v *VMDaoHandler) UpdateVM(vm models.VM) (affected int64, err error) {
 				"vm_os":   vm.OS,
 			})
 	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
 		affected = 0
 		return
 	}
@@ -82,6 +79,9 @@ func (v *VMDaoHandler) UpdateVMSpec(vm models.VM, spec models.VMSpec) (affected 
 				"extras":  spec.Extras,
 			})
 	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
 		affected = 0
 		return
 	}
@@ -91,8 +91,11 @@ func (v *VMDaoHandler) UpdateVMSpec(vm models.VM, spec models.VMSpec) (affected 
 
 func (v *VMDaoHandler) DeleteVM(vmID string) (affected int64, err error) {
 	o := orm.NewOrm()
-	affected, err = o.QueryTable("vm").Filter("vm_id", vmID).Delete()
+	affected, err = o.QueryTable("vm").Filter("vm_id__exact", vmID).Delete()
 	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
 		affected = 0
 		return
 	}

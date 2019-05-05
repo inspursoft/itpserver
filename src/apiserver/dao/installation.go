@@ -25,6 +25,9 @@ func (ins *InstallationDaoHandler) InstallPackageToVM(vm *models.VM, pkg *models
 	m2m := o.QueryM2M(vm, "packages")
 	affected, err = m2m.Add(pkg)
 	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
 		affected = 0
 		return
 	}
@@ -37,6 +40,9 @@ func (ins *InstallationDaoHandler) RemovePackageFromVM(vm *models.VM, pkg *model
 	m2m := o.QueryM2M(vm, "packages")
 	affected, err = m2m.Remove(pkg)
 	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
 		affected = 0
 		return
 	}

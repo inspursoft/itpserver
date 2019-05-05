@@ -25,7 +25,7 @@ func TestOperatePkg(t *testing.T) {
 		assert.Nil(err)
 	})
 	t.Run("GetPkg", func(t *testing.T) {
-		pkgList, err := pkgDaoHandler.GetPackage("Docker")
+		pkgList, err := pkgDaoHandler.GetPackage("Docker", "18.09.1")
 		assert := assert.New(t)
 		assert.Nil(err)
 		assert.Len(pkgList, 1)

@@ -13,18 +13,36 @@ func NewVMHandler() *vmConf {
 	return &vmConf{}
 }
 
-func (vc *vmConf) Get(vmID string) (vms []models.VM, err error) {
-	return vc.daoHandler.GetVM(vmID)
+func (vc *vmConf) Get(vmID string) (vm *models.VM, err error) {
+	vms, err := vc.daoHandler.GetVM(vmID)
+	if err != nil {
+		return
+	}
+	if len(vms) > 0 {
+		vm = vms[0]
+	}
+	return
 }
 
-func (vc *vmConf) Create(vm models.VM, spec models.VMSpec) (status bool, err error) {
+func (vc *vmConf) GetAll() (vms []*models.VM, err error) {
+	vms, err = vc.daoHandler.GetVM("")
+	return
+}
+
+func (vc *vmConf) Create(vmWithSpec models.VMWithSpec) (status bool, err error) {
+	vm := models.VM{VMID: vmWithSpec.VMID, Name: vmWithSpec.Name, OS: vmWithSpec.OS}
+	spec := models.VMSpec{
+		CPUs:    vmWithSpec.Spec.CPUs,
+		Storage: vmWithSpec.Spec.Storage,
+		Memory:  vmWithSpec.Spec.Memory,
+		Extras:  vmWithSpec.Spec.Extras}
 	addedVM, err := vc.daoHandler.AddVM(&vm, &spec)
-	status = (addedVM == nil)
+	status = (err == nil && addedVM.ID != 0)
 	return
 }
 
 func (vc *vmConf) Delete(vmID string) (status bool, err error) {
 	affected, err := vc.daoHandler.DeleteVM(vmID)
-	status = (affected == 1)
+	status = (err == nil && affected != 0)
 	return
 }

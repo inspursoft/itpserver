@@ -10,13 +10,16 @@ import (
 
 type PkgDaoHandler int
 
-func (p *PkgDaoHandler) GetPackage(name ...string) ([]models.Package, error) {
+func (p *PkgDaoHandler) GetPackage(name, tag string) ([]*models.Package, error) {
 	o := orm.NewOrm()
 	q := o.QueryTable("package")
-	if name != nil {
+	if name != "" {
 		q = q.Filter("name", name)
 	}
-	var results []models.Package
+	if tag != "" {
+		q = q.Filter("tag", tag)
+	}
+	var results []*models.Package
 	count, err := q.All(&results)
 	if err != nil {
 		return nil, err
@@ -41,6 +44,9 @@ func (p *PkgDaoHandler) DeletePackage(name string, tag string) (affected int64, 
 	o := orm.NewOrm()
 	affected, err = o.QueryTable("package").Filter("name__exact", name).Filter("tag__exact", tag).Delete()
 	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
 		affected = 0
 		return
 	}
@@ -55,6 +61,9 @@ func (p *PkgDaoHandler) UpdatePackage(pkg models.Package) (affected int64, err e
 			"tag": pkg.Tag,
 		})
 	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
 		affected = 0
 		return
 	}

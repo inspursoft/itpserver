@@ -6,8 +6,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func initDB() {
+func InitDB() {
 	orm.RegisterDriver("postgres", orm.DRPostgres)
-	orm.RegisterDataBase("default", "postgres", "postgres://itp:root123@postgredb:5432/itpdb?sslmode=disable")
+	orm.RegisterDataBase("default", "postgres", "postgres://itp:root123@localhost:8882/itpdb?sslmode=disable")
 	orm.RegisterModel(new(models.VM), new(models.VMSpec), new(models.Package), new(models.Installation))
 }

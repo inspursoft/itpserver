@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/astaxie/beego"
-	_ "github.com/inspursoft/itpserver/src/apiserver/dao"
+	"github.com/inspursoft/itpserver/src/apiserver/dao"
 	_ "github.com/inspursoft/itpserver/src/apiserver/routers"
 )
 
@@ -11,5 +11,6 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
+	dao.InitDB()
 	beego.Run()
 }
