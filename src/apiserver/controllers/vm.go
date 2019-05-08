@@ -1,18 +1,15 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
-	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
 
 // Operations about vm
 type VMController struct {
-	beego.Controller
+	BaseController
 }
 
 // @Title Get
@@ -34,11 +31,9 @@ func (v *VMController) Get() {
 	} else {
 		resp, err = services.NewVMHandler().Get(vmID)
 	}
-	if err != nil {
-		v.CustomAbort(http.StatusInternalServerError, "Failed to get VM list.")
-	}
+	v.handleError(err)
 	if resp == nil {
-		v.CustomAbort(http.StatusNotFound, "No found VM(s)")
+		v.CustomAbort(http.StatusNotFound, "No VM(s) was found.")
 	}
 	v.Data["json"] = resp
 	v.ServeJSON()
@@ -56,17 +51,9 @@ func (v *VMController) Get() {
 // @router / [post]
 func (v *VMController) Post() {
 	var vmWithSpec models.VMWithSpec
-	err := json.Unmarshal(v.Ctx.Input.RequestBody, &vmWithSpec)
-	if err != nil {
-		v.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
-	}
-	status, err := services.NewVMHandler().Create(vmWithSpec)
-	if err != nil {
-		v.CustomAbort(http.StatusInternalServerError, "Failed to create VM.")
-	}
-	if !status {
-		v.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to create VM: %s", vmWithSpec.Name))
-	}
+	v.loadRequestBody(&vmWithSpec)
+	err := services.NewVMHandler().Create(vmWithSpec)
+	v.handleError(err)
 }
 
 // @Title Delete
@@ -80,12 +67,7 @@ func (v *VMController) Post() {
 // @Failure 500 Internal error occurred at server side.
 // @router /:vm_id [delete]
 func (v *VMController) Delete() {
-	vmID := v.GetString(":vm_id")
-	status, err := services.NewVMHandler().Delete(vmID)
-	if err != nil {
-		v.CustomAbort(http.StatusInternalServerError, "Failed to delete VM list.")
-	}
-	if !status {
-		v.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to delete VM by ID: %s", vmID))
-	}
+	vmID := v.requiredParam(":vm_id")
+	err := services.NewVMHandler().Delete(vmID)
+	v.handleError(err)
 }

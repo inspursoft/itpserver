@@ -28,7 +28,20 @@ func (v *VMDaoHandler) AddVM(vm *models.VM, spec *models.VMSpec) (*models.VM, er
 	return vm, nil
 }
 
-func (v *VMDaoHandler) GetVM(vmID string) ([]*models.VM, error) {
+func (v *VMDaoHandler) GetVM(vmID string) (*models.VM, error) {
+	o := orm.NewOrm()
+	vm := models.VM{VMID: vmID}
+	err := o.Read(&vm, "VMID")
+	if err != nil {
+		if err == orm.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &vm, nil
+}
+
+func (v *VMDaoHandler) GetVMList(vmID string) ([]*models.VM, error) {
 	o := orm.NewOrm()
 	q := o.QueryTable("vm")
 	if vmID != "" {

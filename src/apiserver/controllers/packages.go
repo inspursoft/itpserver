@@ -1,17 +1,12 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-
-	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
 
 type PackagesController struct {
-	beego.Controller
+	BaseController
 }
 
 // @Title Get
@@ -37,9 +32,7 @@ func (pc *PackagesController) Get() {
 	} else {
 		resp, err = handler.Get(pkgName, pkgTag)
 	}
-	if err != nil {
-		pc.CustomAbort(http.StatusInternalServerError, "Failed to get package list.")
-	}
+	pc.handleError(err)
 	pc.Data["json"] = resp
 	pc.ServeJSON()
 }
@@ -56,18 +49,10 @@ func (pc *PackagesController) Get() {
 // @router / [post]
 func (pc *PackagesController) Post() {
 	var pkg models.Package
-	err := json.Unmarshal(pc.Ctx.Input.RequestBody, &pkg)
-	if err != nil {
-		pc.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
-	}
+	pc.loadRequestBody(&pkg)
 	handler := services.NewPackageHandler()
-	status, err := handler.Create(pkg)
-	if err != nil {
-		pc.CustomAbort(http.StatusInternalServerError, "Failed to create package list.")
-	}
-	if !status {
-		pc.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to create package: %s", pkg.Name))
-	}
+	err := handler.Create(pkg)
+	pc.handleError(err)
 }
 
 // @Title Delete
@@ -82,13 +67,8 @@ func (pc *PackagesController) Post() {
 // @Failure 500 Internal error occurred at server side.
 // @router / [delete]
 func (pc *PackagesController) Delete() {
-	pkgName := pc.GetString("package_name")
-	pkgTag := pc.GetString("package_tag")
-	status, err := services.NewPackageHandler().Delete(pkgName, pkgTag)
-	if err != nil {
-		pc.CustomAbort(http.StatusInternalServerError, "Failed to delete package.")
-	}
-	if !status {
-		pc.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to delete package: %s, tag: %s", pkgName, pkgTag))
-	}
+	pkgName := pc.requiredParam("package_name")
+	pkgTag := pc.requiredParam("package_tag")
+	err := services.NewPackageHandler().Delete(pkgName, pkgTag)
+	pc.handleError(err)
 }

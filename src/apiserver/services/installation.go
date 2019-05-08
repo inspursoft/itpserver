@@ -3,7 +3,6 @@ package services
 import (
 	"fmt"
 
-	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/dao"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
@@ -12,50 +11,71 @@ type installationConf struct {
 	daoHandler    dao.InstallationDaoHandler
 	daoVMHandler  dao.VMDaoHandler
 	daoPkgHandler dao.PkgDaoHandler
+	e             *models.ITPError
 }
 
 func NewInstallationHandler() *installationConf {
-	return new(installationConf)
+	return &installationConf{e: &models.ITPError{}}
 }
 
 func (ic *installationConf) GetInstalledPackages(vmID string) ([]models.Package, error) {
-	return ic.daoHandler.GetInstallPackages(vmID)
+	pkgs, err := ic.daoHandler.GetInstallPackages(vmID)
+	if err != nil {
+		ic.e.InternalError(err)
+		return nil, ic.e
+	}
+	return pkgs, nil
 }
 
 func (ic *installationConf) getSpecifiedVMPackage(vmID, pkgName, pkgTag string) (vm *models.VM, pkg *models.Package, err error) {
-	vms, err := ic.daoVMHandler.GetVM(vmID)
-	if len(vms) == 0 {
-		beego.Error(fmt.Sprintf("No VM found with VMID: %s", vmID))
-		err = fmt.Errorf(fmt.Sprintf("No VM found with VMID: %s", vmID))
-		return
+	vm, err = ic.daoVMHandler.GetVM(vmID)
+	if err != nil {
+		ic.e.InternalError(err)
+		return nil, nil, ic.e
 	}
-	pkgs, err := ic.daoPkgHandler.GetPackage(pkgName, pkgTag)
-	if len(pkgs) == 0 {
-		beego.Error(fmt.Sprintf("No package found with name: %s, tag: %s", pkg.Name, pkg.Tag))
-		err = fmt.Errorf(fmt.Sprintf("No package found with name: %s, tag: %s", pkg.Name, pkg.Tag))
-		return
+	if vm == nil {
+		ic.e.Notfound(vmID, fmt.Errorf("No VM was found with VMID: %s", vmID))
+		return nil, nil, ic.e
 	}
-	vm = vms[0]
-	pkg = pkgs[0]
+	pkg, err = ic.daoPkgHandler.GetPackage(pkgName, pkgTag)
+	if err != nil {
+		ic.e.InternalError(err)
+		return nil, nil, ic.e
+	}
+	if pkg == nil {
+		ic.e.Notfound(vmID, fmt.Errorf("No package was found with name: %s, tag: %s", pkgName, pkgTag))
+		return nil, nil, ic.e
+	}
 	return
 }
 
-func (ic *installationConf) Install(vmID, pkgName, pkgTag string) (status bool, err error) {
+func (ic *installationConf) Install(vmID, pkgName, pkgTag string) error {
 	vm, pkg, err := ic.getSpecifiedVMPackage(vmID, pkgName, pkgTag)
 	if err != nil {
-		return
+		return ic.e
 	}
-	affected, err := ic.daoHandler.InstallPackageToVM(vm, pkg)
-	status = (err == nil && affected == 1)
-	return
+	exists := ic.daoHandler.CheckPackagesInstalledToVM(vm, pkg)
+	if exists {
+		ic.e.Conflict(fmt.Sprintf("name: %s with tag: %s on VMID: %s", pkgName, pkgTag, vmID), err)
+		return ic.e
+	}
+	_, err = ic.daoHandler.InstallPackageToVM(vm, pkg)
+	if err != nil {
+		ic.e.InternalError(err)
+		return ic.e
+	}
+	return nil
 }
 
-func (ic *installationConf) Delete(vmID, pkgName, pkgTag string) (status bool, err error) {
+func (ic *installationConf) Delete(vmID, pkgName, pkgTag string) error {
 	vm, pkg, err := ic.getSpecifiedVMPackage(vmID, pkgName, pkgTag)
 	if err != nil {
-		return
+		return ic.e
 	}
-	affected, err := ic.daoHandler.RemovePackageFromVM(vm, pkg)
-	status = (err == nil && affected == 1)
-	return
+	_, err = ic.daoHandler.RemovePackageFromVM(vm, pkg)
+	if err != nil {
+		ic.e.InternalError(err)
+		return ic.e
+	}
+	return nil
 }

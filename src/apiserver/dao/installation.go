@@ -20,6 +20,13 @@ func (ins *InstallationDaoHandler) GetInstallPackages(vmID string) (pkgList []mo
 	return
 }
 
+func (ins *InstallationDaoHandler) CheckPackagesInstalledToVM(vm *models.VM, pkg *models.Package) (exists bool) {
+	o := orm.NewOrm()
+	m2m := o.QueryM2M(vm, "packages")
+	exists = m2m.Exist(pkg)
+	return
+}
+
 func (ins *InstallationDaoHandler) InstallPackageToVM(vm *models.VM, pkg *models.Package) (affected int64, err error) {
 	o := orm.NewOrm()
 	m2m := o.QueryM2M(vm, "packages")

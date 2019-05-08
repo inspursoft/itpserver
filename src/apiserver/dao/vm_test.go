@@ -20,7 +20,13 @@ func TestOperateVM(t *testing.T) {
 		assert.Nil(err)
 	})
 	t.Run("GetVM", func(t *testing.T) {
-		vms, err := h.GetVM("1a2b3c")
+		vm, err := h.GetVM("1a2b3c")
+		assert := assert.New(t)
+		assert.Nil(err)
+		assert.NotNil(vm)
+	})
+	t.Run("GetVMList", func(t *testing.T) {
+		vms, err := h.GetVMList("1a2b3c")
 		assert := assert.New(t)
 		assert.Nil(err)
 		assert.NotNil(vms)

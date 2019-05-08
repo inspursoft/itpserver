@@ -1,17 +1,12 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-
-	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
 
 type InstallationController struct {
-	beego.Controller
+	BaseController
 }
 
 // @Title Get
@@ -25,12 +20,9 @@ type InstallationController struct {
 // @Failure 500 Internal error occurred at server side.
 // @router / [get]
 func (ic *InstallationController) Get() {
-	vmID := ic.GetString("vm_id")
-	handler := services.NewInstallationHandler()
-	installations, err := handler.GetInstalledPackages(vmID)
-	if err != nil {
-		ic.CustomAbort(http.StatusInternalServerError, "Failed to get installed packages.")
-	}
+	vmID := ic.requiredParam("vm_id")
+	installations, err := services.NewInstallationHandler().GetInstalledPackages(vmID)
+	ic.handleError(err)
 	ic.Data["json"] = installations
 	ic.ServeJSON()
 }
@@ -47,25 +39,18 @@ func (ic *InstallationController) Get() {
 // @Failure 500 Internal error occurred at server side.
 // @router /:vm_id [post]
 func (ic *InstallationController) Post() {
-	vmID := ic.GetString(":vm_id")
+	vmID := ic.requiredParam(":vm_id")
 	var pkg models.PackageVO
-	err := json.Unmarshal(ic.Ctx.Input.RequestBody, &pkg)
-	if err != nil {
-		ic.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
-	}
-	status, err := services.NewInstallationHandler().Install(vmID, pkg.Name, pkg.Tag)
-	if err != nil {
-		ic.CustomAbort(http.StatusInternalServerError, "Failed to install package.")
-	}
-	if !status {
-		ic.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to create packages to VM ID: %s", vmID))
-	}
+	ic.loadRequestBody(&pkg)
+	err := services.NewInstallationHandler().Install(vmID, pkg.Name, pkg.Tag)
+	ic.handleError(err)
 }
 
 // @Title Delete
 // @Description Delete selected virtual machine which with software package installed.
 // @Param	vm_id	path 	string	true		"The virtual machine ID to be deleted."
-// @Param pkg	body	models.PackageVO	true "The package to be deleted on VM."
+// @Param pkg_name	query	string	true	"The package name to be deleted on VM."
+// @Param pkg_tag	query	string	true	"The package tag to be deleted on VM."
 // @Success 200 {string} 	Successful deleted virtual machine by ID.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
@@ -74,18 +59,11 @@ func (ic *InstallationController) Post() {
 // @Failure 500 Internal error occurred at server side.
 // @router /:vm_id [delete]
 func (ic *InstallationController) Delete() {
-	vmID := ic.GetString(":vm_id")
-	var pkg models.PackageVO
-	err := json.Unmarshal(ic.Ctx.Input.RequestBody, &pkg)
-	if err != nil {
-		ic.CustomAbort(http.StatusInternalServerError, "Failed to unmarshal request data.")
-	}
+	vmID := ic.requiredParam(":vm_id")
+	pkgName := ic.requiredParam("pkg_name")
+	pkgTag := ic.requiredParam("pkg_tag")
+
 	handler := services.NewInstallationHandler()
-	status, err := handler.Delete(vmID, pkg.Name, pkg.Tag)
-	if err != nil {
-		ic.CustomAbort(http.StatusInternalServerError, "Failed to delete package.")
-	}
-	if !status {
-		ic.CustomAbort(http.StatusExpectationFailed, fmt.Sprintf("Failed to delete package to VM ID: %s", vmID))
-	}
+	err := handler.Delete(vmID, pkgName, pkgTag)
+	ic.handleError(err)
 }

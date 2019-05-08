@@ -10,7 +10,20 @@ import (
 
 type PkgDaoHandler int
 
-func (p *PkgDaoHandler) GetPackage(name, tag string) ([]*models.Package, error) {
+func (p *PkgDaoHandler) GetPackage(name, tag string) (*models.Package, error) {
+	o := orm.NewOrm()
+	pkg := models.Package{Name: name, Tag: tag}
+	err := o.Read(&pkg, "Name", "Tag")
+	if err != nil {
+		if err == orm.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &pkg, nil
+}
+
+func (p *PkgDaoHandler) GetPackageList(name, tag string) ([]*models.Package, error) {
 	o := orm.NewOrm()
 	q := o.QueryTable("package")
 	if name != "" {
@@ -26,7 +39,6 @@ func (p *PkgDaoHandler) GetPackage(name, tag string) ([]*models.Package, error) 
 	}
 	beego.Info(fmt.Sprintf("Successful got %d package(s) with name: %s", count, name))
 	return results, nil
-
 }
 
 func (p *PkgDaoHandler) AddPackage(pkg *models.Package) (insertedID int64, err error) {
@@ -36,7 +48,7 @@ func (p *PkgDaoHandler) AddPackage(pkg *models.Package) (insertedID int64, err e
 		insertedID = 0
 		return
 	}
-	beego.Info(fmt.Sprintf("Successful inserted %d package(s).", insertedID))
+	beego.Info(fmt.Sprintf("Successful inserted package with ID: %d.", insertedID))
 	return
 }
 
@@ -50,7 +62,7 @@ func (p *PkgDaoHandler) DeletePackage(name string, tag string) (affected int64, 
 		affected = 0
 		return
 	}
-	beego.Info(fmt.Sprintf("Successful deleted %d package(s).", affected))
+	beego.Info(fmt.Sprintf("Successful deleted package with ID: %d.", affected))
 	return
 }
 
