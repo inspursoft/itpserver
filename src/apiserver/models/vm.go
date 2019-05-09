@@ -2,7 +2,7 @@ package models
 
 type VM struct {
 	ID       int64      `json:"id" orm:"column(id);auto;pk"`
-	VMID     string     `json:"vm_id" orm:"column(vm_id)"`
+	IP       string     `json:"vm_ip" orm:"column(vm_ip)"`
 	Name     string     `json:"vm_name" orm:"column(vm_name)"`
 	OS       string     `json:"vm_os" orm:"column(vm_os)"`
 	Spec     *VMSpec    `json:"vm_spec" orm:"reverse(one);on_delete(cascade)"`
@@ -16,6 +16,7 @@ func (vm *VM) TableName() string {
 type VMSpec struct {
 	VM      *VM    `json:"-" orm:"column(vm_id);rel(one)"`
 	ID      int64  `json:"-" orm:"column(id);auto;pk"`
+	VID     string `json:"vid" orm:"column(vid)"`
 	CPUs    int32  `json:"cpus" orm:"column(cpus)"`
 	Memory  string `json:"memory" orm:"column(memory)"`
 	Storage string `json:"storage" orm:"column(storage)"`
@@ -27,7 +28,7 @@ func (spec *VMSpec) TableName() string {
 }
 
 type VMWithSpec struct {
-	VMID string `json:"vm_id"`
+	IP   string `json:"vm_ip"`
 	Name string `json:"vm_name"`
 	OS   string `json:"vm_os"`
 	Spec VMSpec `json:"vm_spec"`

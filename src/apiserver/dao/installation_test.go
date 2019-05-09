@@ -10,7 +10,7 @@ import (
 
 func TestOperateInstallation(t *testing.T) {
 	spec := models.VMSpec{CPUs: 2, Memory: "2Gb", Storage: "512Gb"}
-	vm := models.VM{Name: "test-vm-1", VMID: "test-1a2b", OS: "Linux 3.7"}
+	vm := models.VM{Name: "test-vm-1", OS: "Linux 3.7"}
 	pkg := models.Package{Name: "Ruby", Tag: "2.3.1"}
 
 	var insHandler dao.InstallationDaoHandler
@@ -25,7 +25,7 @@ func TestOperateInstallation(t *testing.T) {
 		assert.Equal(int64(1), affected)
 	})
 	t.Run("GetInstalledPkgs", func(t *testing.T) {
-		pkgList, err := insHandler.GetInstallPackages("test-1a2b")
+		pkgList, err := insHandler.GetInstallPackages(vm.ID)
 		assert := assert.New(t)
 		assert.Nil(err)
 		assert.Len(pkgList, 1)

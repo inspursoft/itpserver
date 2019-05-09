@@ -10,6 +10,7 @@ import (
 type installationConf struct {
 	daoHandler    dao.InstallationDaoHandler
 	daoVMHandler  dao.VMDaoHandler
+	svcVMHandler  vmConf
 	daoPkgHandler dao.PkgDaoHandler
 	e             *models.ITPError
 }
@@ -18,8 +19,8 @@ func NewInstallationHandler() *installationConf {
 	return &installationConf{e: &models.ITPError{}}
 }
 
-func (ic *installationConf) GetInstalledPackages(vmID string) ([]models.Package, error) {
-	pkgs, err := ic.daoHandler.GetInstallPackages(vmID)
+func (ic *installationConf) GetInstalledPackages(ID int64) ([]models.Package, error) {
+	pkgs, err := ic.daoHandler.GetInstallPackages(ID)
 	if err != nil {
 		ic.e.InternalError(err)
 		return nil, ic.e
@@ -27,14 +28,14 @@ func (ic *installationConf) GetInstalledPackages(vmID string) ([]models.Package,
 	return pkgs, nil
 }
 
-func (ic *installationConf) getSpecifiedVMPackage(vmID, pkgName, pkgTag string) (vm *models.VM, pkg *models.Package, err error) {
-	vm, err = ic.daoVMHandler.GetVM(vmID)
+func (ic *installationConf) getSpecifiedVMPackage(ID int64, pkgName, pkgTag string) (vm *models.VM, pkg *models.Package, err error) {
+	vm, err = ic.svcVMHandler.GetByID(ID)
 	if err != nil {
 		ic.e.InternalError(err)
 		return nil, nil, ic.e
 	}
 	if vm == nil {
-		ic.e.Notfound(vmID, fmt.Errorf("No VM was found with VMID: %s", vmID))
+		ic.e.Notfound("VM", fmt.Errorf("No VM was found with ID: %d", ID))
 		return nil, nil, ic.e
 	}
 	pkg, err = ic.daoPkgHandler.GetPackage(pkgName, pkgTag)
@@ -43,20 +44,20 @@ func (ic *installationConf) getSpecifiedVMPackage(vmID, pkgName, pkgTag string) 
 		return nil, nil, ic.e
 	}
 	if pkg == nil {
-		ic.e.Notfound(vmID, fmt.Errorf("No package was found with name: %s, tag: %s", pkgName, pkgTag))
+		ic.e.Notfound("VM", fmt.Errorf("No package was found with name: %s, tag: %s", pkgName, pkgTag))
 		return nil, nil, ic.e
 	}
 	return
 }
 
-func (ic *installationConf) Install(vmID, pkgName, pkgTag string) error {
-	vm, pkg, err := ic.getSpecifiedVMPackage(vmID, pkgName, pkgTag)
+func (ic *installationConf) Install(ID int64, pkgName, pkgTag string) error {
+	vm, pkg, err := ic.getSpecifiedVMPackage(ID, pkgName, pkgTag)
 	if err != nil {
 		return ic.e
 	}
 	exists := ic.daoHandler.CheckPackagesInstalledToVM(vm, pkg)
 	if exists {
-		ic.e.Conflict(fmt.Sprintf("name: %s with tag: %s on VMID: %s", pkgName, pkgTag, vmID), err)
+		ic.e.Conflict(fmt.Sprintf("name: %s with tag: %s on ID: %d", pkgName, pkgTag, ID), err)
 		return ic.e
 	}
 	_, err = ic.daoHandler.InstallPackageToVM(vm, pkg)
@@ -67,8 +68,8 @@ func (ic *installationConf) Install(vmID, pkgName, pkgTag string) error {
 	return nil
 }
 
-func (ic *installationConf) Delete(vmID, pkgName, pkgTag string) error {
-	vm, pkg, err := ic.getSpecifiedVMPackage(vmID, pkgName, pkgTag)
+func (ic *installationConf) Delete(ID int64, pkgName, pkgTag string) error {
+	vm, pkg, err := ic.getSpecifiedVMPackage(ID, pkgName, pkgTag)
 	if err != nil {
 		return ic.e
 	}

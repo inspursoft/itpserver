@@ -19,12 +19,12 @@ func (e *ITPError) Status() int {
 }
 
 func (e *ITPError) Notfound(target string, err error) {
-	e.errMessage = fmt.Sprintf("Target: %s was not found, with error: %+v", target, err)
+	e.errMessage = fmt.Sprintf("Target: %s was not found, with detail: %+v.", target, err)
 	e.statusCode = http.StatusNotFound
 }
 
 func (e *ITPError) Conflict(target string, err error) {
-	e.errMessage = fmt.Sprintf("Target: %s was conflict, with error: %+v", target, err)
+	e.errMessage = fmt.Sprintf("Target: %s was conflict, with detail: %+v", target, err)
 	e.statusCode = http.StatusConflict
 }
 

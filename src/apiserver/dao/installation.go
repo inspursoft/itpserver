@@ -10,13 +10,13 @@ import (
 
 type InstallationDaoHandler int
 
-func (ins *InstallationDaoHandler) GetInstallPackages(vmID string) (pkgList []models.Package, err error) {
+func (ins *InstallationDaoHandler) GetInstallPackages(ID int64) (pkgList []models.Package, err error) {
 	o := orm.NewOrm()
-	count, err := o.QueryTable("package").Filter("VMs__VM__VMID", vmID).All(&pkgList)
+	count, err := o.QueryTable("package").Filter("VMs__VM__ID", ID).All(&pkgList)
 	if err != nil {
 		return
 	}
-	beego.Info(fmt.Sprintf("Successful got %d package(s) from VM with ID: %s", count, vmID))
+	beego.Info(fmt.Sprintf("Successful got %d package(s) from VM with ID: %d", count, ID))
 	return
 }
 

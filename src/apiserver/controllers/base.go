@@ -14,6 +14,14 @@ type BaseController struct {
 	beego.Controller
 }
 
+func (bc *BaseController) requiredID(key string) int64 {
+	id, err := bc.GetInt64(key, 0)
+	if err != nil {
+		bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Invalid input: %+v", err))
+	}
+	return id
+}
+
 func (bc *BaseController) requiredParam(key string) string {
 	content := bc.GetString(key)
 	if strings.TrimSpace(content) == "" {
@@ -32,9 +40,24 @@ func (bc *BaseController) loadRequestBody(target interface{}) {
 func (bc *BaseController) handleError(err error) {
 	if err != nil {
 		if e, ok := err.(*models.ITPError); ok {
-			bc.CustomAbort(e.Status(), e.Error())
+			bc.serveStatus(e.Status(), e.Error())
 			return
 		}
-		bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
+		bc.serveStatus(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
 	}
+}
+
+func (bc *BaseController) serveStatus(status int, message string) {
+	bc.Data["json"] = struct {
+		Status  int    `json:"status"`
+		Message string `json:"message"`
+	}{
+		status, message,
+	}
+	bc.ServeJSON()
+}
+
+func (bc *BaseController) serveJSON(target interface{}) {
+	bc.Data["json"] = target
+	bc.ServeJSON()
 }

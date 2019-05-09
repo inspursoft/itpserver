@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
@@ -14,29 +12,26 @@ type VMController struct {
 
 // @Title Get
 // @Description Returns a list of virtual machines or filtered by VM ID.
-// @Param	vm_id		query 	string	false		"The virual machine name to return."
+// @Param	id		path 	int64	false		"The virual machine name to return."
 // @Success 200 {string} 	Successful get all or filter virtual machine by name.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @router / [get]
+// @router /:id [get]
 func (v *VMController) Get() {
-	vmID := v.GetString("vm_id", "")
+	ID := v.requiredID(":id")
 	var resp interface{}
 	var err error
-	if vmID == "" {
-		resp, err = services.NewVMHandler().GetAll()
+	handler := services.NewVMHandler()
+	if ID == 0 {
+		resp, err = handler.GetVMList()
 	} else {
-		resp, err = services.NewVMHandler().Get(vmID)
+		resp, err = handler.GetByID(ID)
 	}
 	v.handleError(err)
-	if resp == nil {
-		v.CustomAbort(http.StatusNotFound, "No VM(s) was found.")
-	}
-	v.Data["json"] = resp
-	v.ServeJSON()
+	v.serveJSON(resp)
 }
 
 // @Title Post
@@ -58,16 +53,16 @@ func (v *VMController) Post() {
 
 // @Title Delete
 // @Description Delete a virtual machine by ID.
-// @Param	vm_id	path 	string	true		"The virtual machine ID to be deleted."
+// @Param	id	path 	int64	true		"The virtual machine ID to be deleted."
 // @Success 200 {string} 	Successful deleted virtual machine by ID.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @router /:vm_id [delete]
+// @router /:id [delete]
 func (v *VMController) Delete() {
-	vmID := v.requiredParam(":vm_id")
-	err := services.NewVMHandler().Delete(vmID)
+	ID := v.requiredID(":id")
+	err := services.NewVMHandler().DeleteByID(ID)
 	v.handleError(err)
 }
