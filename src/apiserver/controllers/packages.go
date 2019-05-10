@@ -33,8 +33,7 @@ func (pc *PackagesController) Get() {
 		resp, err = handler.Get(pkgName, pkgTag)
 	}
 	pc.handleError(err)
-	pc.Data["json"] = resp
-	pc.ServeJSON()
+	pc.serveJSON(resp)
 }
 
 // @Title Post

@@ -12,16 +12,16 @@ type VMController struct {
 
 // @Title Get
 // @Description Returns a list of virtual machines or filtered by VM ID.
-// @Param	id		path 	int64	false		"The virual machine name to return."
+// @Param	id		query 	int64	false		"The virual machine name to return."
 // @Success 200 {string} 	Successful get all or filter virtual machine by name.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @router /:id [get]
+// @router / [get]
 func (v *VMController) Get() {
-	ID := v.requiredID(":id")
+	ID := v.requiredID("id")
 	var resp interface{}
 	var err error
 	handler := services.NewVMHandler()
