@@ -10,7 +10,6 @@ import (
 type installationConf struct {
 	daoHandler    dao.InstallationDaoHandler
 	daoVMHandler  dao.VMDaoHandler
-	svcVMHandler  vmConf
 	daoPkgHandler dao.PkgDaoHandler
 	e             *models.ITPError
 }
@@ -29,7 +28,7 @@ func (ic *installationConf) GetInstalledPackages(ID int64) ([]models.Package, er
 }
 
 func (ic *installationConf) getSpecifiedVMPackage(ID int64, pkgName, pkgTag string) (vm *models.VM, pkg *models.Package, err error) {
-	vm, err = ic.svcVMHandler.GetByID(ID)
+	vm, err = ic.daoVMHandler.GetVM(models.VM{ID: ID}, "ID")
 	if err != nil {
 		ic.e.InternalError(err)
 		return nil, nil, ic.e
