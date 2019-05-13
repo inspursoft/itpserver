@@ -40,6 +40,7 @@ func (bc *BaseController) loadRequestBody(target interface{}) {
 func (bc *BaseController) handleError(err error) {
 	if err != nil {
 		if e, ok := err.(*models.ITPError); ok {
+			fmt.Printf("%+v\n", e)
 			bc.CustomAbort(e.Status(), e.Error())
 		}
 		bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
