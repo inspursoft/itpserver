@@ -1,0 +1,101 @@
+import { Component, OnInit } from '@angular/core';
+import { Package, Vm } from '../../compatibility.type';
+import { CompatibilityService } from '../../compatibility.service';
+import { SharedActionService } from '../../../shared/shared.action.service';
+import { NzMessageService, NzModalService } from 'ng-zorro-antd';
+import { VmDetailComponent } from '../../vm/vm-detail/vm-detail.component';
+
+@Component({
+  selector: 'app-installation-list',
+  templateUrl: './installation-list.component.html',
+  styleUrls: ['./installation-list.component.less']
+})
+export class InstallationListComponent implements OnInit {
+  current = 0;
+  vmList: Array<Vm>;
+  packageList: Array<Package>;
+  selectedVm: Vm;
+  selectedPackage: Package;
+
+  constructor(private service: CompatibilityService,
+              private messageService: NzMessageService,
+              private sharedActionService: SharedActionService,
+              private modalService: NzModalService) {
+    this.vmList = Array<Vm>();
+    this.packageList = Array<Package>();
+  }
+
+  ngOnInit(): void {
+    this.service.getVmList().subscribe((res: Array<Vm>) => this.vmList = res);
+    this.service.getPackageList().subscribe((res: Array<Package>) => this.packageList = res);
+  }
+
+  pre(): void {
+    this.current -= 1;
+  }
+
+  next(): void {
+    this.current += 1;
+  }
+
+  createInstallation() {
+    if (!this.selectedVm) {
+      this.messageService.warning('请选择测试环境');
+    } else if (!this.selectedPackage) {
+      this.messageService.warning('请选择工具集');
+    } else {
+      this.service.createInstallation(this.selectedVm.id, this.selectedPackage.name, this.selectedPackage.tag).subscribe(
+        () => this.messageService.success('安装成功'),
+        () => this.messageService.warning('安装失败'),
+        () => {
+          this.selectedPackage = null;
+          this.selectedVm = null;
+          this.current = 0;
+        });
+    }
+  }
+
+  showDetailInfo(vmId: number, event: Event) {
+    event.stopPropagation();
+    const modal = this.modalService.create({
+      nzTitle: '详细信息',
+      nzContent: VmDetailComponent,
+      nzComponentParams: {Id: vmId},
+      nzFooter: [{
+        label: '确定',
+        shape: 'primary',
+        onClick: () => modal.destroy()
+      }]
+    });
+  }
+
+  selectVm(vm: Vm) {
+    this.selectedVm = vm;
+    this.current += 1;
+  }
+
+  selectPackage(packageInfo: Package) {
+    this.selectedPackage = packageInfo;
+    this.current += 1;
+  }
+
+  createPackage() {
+    this.sharedActionService.createPackage().subscribe((packageInfo: Package) => {
+      if (packageInfo) {
+        this.packageList.push(packageInfo);
+        this.selectedPackage = packageInfo;
+        this.current += 1;
+      }
+    });
+  }
+
+  createVm() {
+    this.sharedActionService.createVm().subscribe((vm: Vm) => {
+      if (vm) {
+        this.vmList.push(vm);
+        this.selectedVm = vm;
+        this.current += 1;
+      }
+    });
+  }
+}

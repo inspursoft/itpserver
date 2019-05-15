@@ -1,0 +1,108 @@
+<div nz-row nzType="flex" nzJustify="center">
+  <div style="width: 1024px;margin-top: 40px;">
+    <nz-steps [nzCurrent]="current">
+      <nz-step nzTitle="选择测试环境"></nz-step>
+      <nz-step nzTitle="选择工具集"></nz-step>
+      <nz-step nzTitle="安装"></nz-step>
+    </nz-steps>
+    <ng-container *ngIf="current == 0" [ngTemplateOutlet]="vm"></ng-container>
+    <ng-container *ngIf="current == 1" [ngTemplateOutlet]="packageInfo"></ng-container>
+    <ng-container *ngIf="current == 2" [ngTemplateOutlet]="install"></ng-container>
+  </div>
+</div>
+<ng-template #vmCover>
+  <img alt="" src="../../../../assets/images/your-logo-here.png">
+</ng-template>
+<ng-template #packageCover>
+  <img alt="" src="../../../../assets/images/tools.png">
+</ng-template>
+<ng-template #vm>
+  <div nz-row nzType="flex">
+    <nz-card class="vm"
+             *ngFor="let vm of vmList"
+             [nzHoverable]="true"
+             [class.selected]="vm.ip === selectedVm?.ip && vm.name === selectedVm?.name"
+             [nzCover]="vmCover"
+             (click)="selectVm(vm)">
+      <nz-card-meta [nzTitle]="vm.name" [nzDescription]="vm.os"></nz-card-meta>
+      <h4>Cpus:{{vm.spec.cpus}}</h4>
+      <h4>Memory:{{vm.spec.memory}}</h4>
+      <h4>Storage:{{vm.spec.storage}}</h4>
+      <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
+        <a (click)="showDetailInfo(vm.id, $event)">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+        </a>
+      </div>
+    </nz-card>
+    <div nz-row nzType="flex" style="margin: auto 5px 5px">
+      <a (click)="createVm()">
+        <i style="font-size: 24px;" nz-icon nzType="plus-circle" nzTheme="outline"></i>
+      </a>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #packageInfo>
+  <div nz-row nzType="flex" [nzAlign]="'middle'">
+    <nz-card class="vm" [nzCover]="vmCover">
+      <nz-card-meta [nzTitle]="selectedVm.name" [nzDescription]="selectedVm.os"></nz-card-meta>
+      <h4>Cpus:{{selectedVm.spec.cpus}}</h4>
+      <h4>Memory:{{selectedVm.spec.memory}}</h4>
+      <h4>Storage:{{selectedVm.spec.storage}}</h4>
+      <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
+        <a (click)="showDetailInfo(selectedVm.id, $event)">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+        </a>
+      </div>
+    </nz-card>
+    <i nz-icon style="font-size: 72px;color: lightblue" nzType="plus" nzTheme="outline"></i>
+  </div>
+  <div nz-row nzType="flex">
+    <nz-card class="package-info"
+             *ngFor="let packageInfo of packageList"
+             [class.selected]="packageInfo.name === selectedPackage?.name && packageInfo.tag === selectedPackage?.tag"
+             [nzCover]="packageCover"
+             [nzHoverable]="true"
+             (click)="selectPackage(packageInfo)">
+      <nz-card-meta [nzTitle]="packageInfo.name" [nzDescription]="packageInfo.tag"></nz-card-meta>
+    </nz-card>
+    <div nz-row nzType="flex" style="margin: auto 5px 5px">
+      <a (click)="pre()">
+        <i style="font-size: 24px;" nz-icon nzType="left-circle" nzTheme="outline"></i>
+      </a>
+      <nz-divider nzType="vertical" style="margin:0 5px"></nz-divider>
+      <a (click)="createPackage()">
+        <i style="font-size: 24px;" nz-icon nzType="plus-circle" nzTheme="outline"></i>
+      </a>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #install>
+  <div nz-row nzType="flex" [nzAlign]="'middle'">
+    <nz-card class="vm" [nzCover]="vmCover">
+      <nz-card-meta [nzTitle]="selectedVm.name" [nzDescription]="selectedVm.os"></nz-card-meta>
+      <h4>Cpus:{{selectedVm.spec.cpus}}</h4>
+      <h4>Memory:{{selectedVm.spec.memory}}</h4>
+      <h4>Storage:{{selectedVm.spec.storage}}</h4>
+      <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
+        <a (click)="showDetailInfo(selectedVm.id, $event)">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+        </a>
+      </div>
+    </nz-card>
+    <i nz-icon style="font-size: 72px;color: lightblue" nzType="plus" nzTheme="outline"></i>
+    <nz-card class="package-info" [nzCover]="packageCover">
+      <nz-card-meta [nzTitle]="selectedPackage.name" [nzDescription]="selectedPackage.tag"></nz-card-meta>
+    </nz-card>
+    <i nz-icon style="font-size: 72px;color: lightblue" nzType="double-right" nzTheme="outline"></i>
+    <a (click)="createInstallation()">
+      <i style="font-size: 48px;" nz-icon nzType="download" nzTheme="outline"></i>
+    </a>
+    <div nz-row nzType="flex" style="margin: auto 5px 5px">
+      <a (click)="pre()">
+        <i style="font-size: 24px;" nz-icon nzType="left-circle" nzTheme="outline"></i>
+      </a>
+    </div>
+  </div>
+</ng-template>

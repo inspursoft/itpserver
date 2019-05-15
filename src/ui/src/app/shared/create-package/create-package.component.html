@@ -1,0 +1,57 @@
+<form nz-form [formGroup]="packageFromGroup">
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">工具集名称</nz-form-label>
+    <nz-form-control [nzSpan]="17" nzHasFeedback>
+      <input nz-input formControlName="name" placeholder="工具集名称"/>
+      <nz-form-explain
+        *ngIf="
+        (packageFromGroup.get('name')?.dirty && packageFromGroup.get('name')?.errors)||
+        packageFromGroup.get('name')?.pending">
+        <ng-container *ngIf="packageFromGroup.get('name')?.hasError('required')">
+          请输入工具集名称
+        </ng-container>
+        <ng-container *ngIf="packageFromGroup.get('name')?.hasError('duplicated')">
+          工具集名称已存在
+        </ng-container>
+        <ng-container *ngIf="packageFromGroup.get('name')?.pending">
+          验证中...
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">工具集版本</nz-form-label>
+    <nz-form-control [nzSpan]="17" nzHasFeedback>
+      <input nz-input formControlName="tag" placeholder="输入工具集版本"/>
+      <nz-form-explain
+        *ngIf="
+        (packageFromGroup.get('tag')?.dirty && packageFromGroup.get('tag')?.errors)||
+        packageFromGroup.get('tag')?.pending">
+        <ng-container *ngIf="packageFromGroup.get('tag')?.hasError('required')">
+          请输入工具集版本
+        </ng-container>
+        <ng-container *ngIf="packageFromGroup.get('tag')?.hasError('duplicated')">
+          工具集版本已存在
+        </ng-container>
+        <ng-container *ngIf="packageFromGroup.get('tag')?.pending">
+          验证中...
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-upload
+    nzType="drag"
+    nzAction="https://jsonplaceholder.typicode.com/posts/"
+    (nzChange)="handleChange($event)"
+  >
+    <p class="ant-upload-drag-icon">
+      <i nz-icon nzType="inbox"></i>
+    </p>
+    <p class="ant-upload-text">Click or drag file to this area to upload</p>
+    <p class="ant-upload-hint">
+      Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files
+    </p>
+  </nz-upload>
+</form>

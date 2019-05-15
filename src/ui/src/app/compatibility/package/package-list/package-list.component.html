@@ -1,0 +1,30 @@
+<div nz-row nzType="flex" [nzJustify]="'end'">
+  <button nz-button nzType="primary" style="margin-left: auto" (click)="createPackage()">创建工具集</button>
+</div>
+<nz-table nzBordered
+          nzShowPagination
+          nzShowSizeChanger
+          [nzTotal]="packageList.length"
+          [(nzPageIndex)]="pageIndex"
+          [(nzPageSize)]="pageSize"
+          [nzData]="packageList"
+          [nzLoading]="loading">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Tag</th>
+    <th>Options</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let package of packageList">
+    <td>{{ package.name }}</td>
+    <td>{{ package.tag }}</td>
+    <td>
+      <i nz-icon nzType="delete" nzTheme="outline"></i>
+      <a (click)="deletePackage(package.name, package.tag)">Delete</a>
+      <nz-divider nzType="vertical"></nz-divider>
+    </td>
+  </tr>
+  </tbody>
+</nz-table>
