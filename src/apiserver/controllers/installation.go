@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
+	"github.com/inspursoft/itpserver/src/apiserver/services/ansiblecli"
 )
 
 type InstallationController struct {
@@ -40,9 +41,14 @@ func (ic *InstallationController) Get() {
 // @router /:id [post]
 func (ic *InstallationController) Post() {
 	ID := ic.requiredID(":id")
+	vm, err := services.NewVMHandler().GetByID(ID)
+	ic.handleError(err)
+	vmWithSpec := models.VMWithSpec{
+		IP: vm.IP, Name: vm.Name, OS: vm.OS,
+	}
 	var pkg models.PackageVO
 	ic.loadRequestBody(&pkg)
-	err := services.NewInstallationHandler().Install(ID, pkg.Name, pkg.Tag)
+	err = ansiblecli.NewClient().Install(vmWithSpec, []models.PackageVO{pkg})
 	ic.handleError(err)
 }
 

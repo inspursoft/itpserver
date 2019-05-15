@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
+	"github.com/inspursoft/itpserver/src/apiserver/services/vagrantcli"
 )
 
 // Operations about vm
@@ -47,7 +48,7 @@ func (v *VMController) Get() {
 func (v *VMController) Post() {
 	var vmWithSpec models.VMWithSpec
 	v.loadRequestBody(&vmWithSpec)
-	err := services.NewVMHandler().Create(vmWithSpec)
+	err := vagrantcli.NewClient(vmWithSpec).Create()
 	v.handleError(err)
 }
 

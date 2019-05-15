@@ -16,18 +16,32 @@ func NewVMHandler() *vmConf {
 	return &vmConf{e: &models.ITPError{}}
 }
 
-func (vc *vmConf) GetByID(ID int64) (vm *models.VM, err error) {
-	query := models.VM{ID: ID}
+func (vc *vmConf) GetByField(value interface{}, field string) (vm *models.VM, err error) {
+	query := models.VM{}
+	if str, ok := value.(string); ok {
+		query.IP = str
+	}
+	if val, ok := value.(int64); ok {
+		query.ID = val
+	}
 	vm, err = vc.daoHandler.GetVM(query, "ID")
 	if err != nil {
 		vc.e.InternalError(err)
 		return nil, vc.e
 	}
 	if vm == nil {
-		vc.e.Notfound("VM", fmt.Errorf("No VM was found with ID: %d", ID))
+		vc.e.Notfound("VM", fmt.Errorf("No VM was found %s with value:%+v", field, value))
 		return nil, vc.e
 	}
 	return
+}
+
+func (vc *vmConf) GetByIP(IP string) (vm *models.VM, err error) {
+	return vc.GetByField(IP, "IP")
+}
+
+func (vc *vmConf) GetByID(ID int64) (vm *models.VM, err error) {
+	return vc.GetByField(ID, "ID")
 }
 
 func (vc *vmConf) Exists(query models.VM) (exists bool, err error) {

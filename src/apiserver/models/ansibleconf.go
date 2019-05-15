@@ -1,7 +1,11 @@
 package models
 
+type SimpleInstall struct {
+	PkgName string
+}
+
 type Install struct {
-	Items []InstallItem `yaml:"install"`
+	Items []InstallItem `yaml:"installs"`
 }
 
 type InstallItem struct {

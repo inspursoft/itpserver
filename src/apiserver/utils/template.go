@@ -1,26 +1,22 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
-	"html/template"
-	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/astaxie/beego"
 )
 
-const templatePath = "../../templates"
-
-func ExecuteTemplate(data interface{}, templateName string, targetPath string) error {
+func ExecuteTemplate(data interface{}, templateName string) ([]byte, error) {
+	templatePath := beego.AppConfig.String("templatepath")
 	t, err := template.ParseFiles(filepath.Join(templatePath, templateName))
 	if err != nil {
 		beego.Error(fmt.Sprintf("Failed to parse template file: %s, with err: %+v", filepath.Join(templatePath, templateName), err))
-		return err
+		return nil, err
 	}
-	f, err := os.OpenFile(filepath.Join(targetPath, templateName), os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	return t.Execute(f, data)
+	var buf bytes.Buffer
+	err = t.Execute(&buf, data)
+	return buf.Bytes(), err
 }
