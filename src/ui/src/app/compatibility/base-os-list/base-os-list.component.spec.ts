@@ -4,7 +4,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { RouteBaseOs,} from '../../shared/shared.const';
+import { RouteBaseOs } from '../../shared/shared.const';
 
 describe('BaseOsListComponent', () => {
   let component: BaseOsListComponent;
