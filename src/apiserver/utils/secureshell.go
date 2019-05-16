@@ -18,11 +18,11 @@ const maxSSHRetries = 10
 const maxSSHDelay = 50 * time.Microsecond
 
 type SecureShell struct {
-	client    *ssh.Client
-	stdOutput bytes.Buffer
+	client *ssh.Client
+	output io.Writer
 }
 
-func NewSecureShell() (*SecureShell, error) {
+func NewSecureShell(output io.Writer) (*SecureShell, error) {
 	host := beego.AppConfig.String("ssh::host")
 	port, _ := beego.AppConfig.Int("ssh::port")
 	username := beego.AppConfig.String("ssh::username")
@@ -41,7 +41,6 @@ func NewSecureShell() (*SecureShell, error) {
 			log.Printf("Failed to dial host: %+v\n", err)
 			continue
 		}
-
 		s, err := client.NewSession()
 		if err != nil {
 			client.Close()
@@ -57,76 +56,59 @@ func NewSecureShell() (*SecureShell, error) {
 		if err := s.RequestPty("xterm", 40, 80, modes); err != nil {
 			return nil, fmt.Errorf("failed to get pseudo-terminal: %v", err)
 		}
-		return &SecureShell{client: client}, nil
+		return &SecureShell{client: client, output: output}, nil
 	}
 	return nil, nil
-}
-
-func (s *SecureShell) execute(callback func(stdOutput *bytes.Buffer, args ...string) error, commands ...string) (err error) {
-	var stdOutput bytes.Buffer
-	err = callback(&stdOutput, commands...)
-	if err != nil {
-		log.Printf("Failed to execute via SSH: %+v\n", err)
-	}
-	go io.Copy(os.Stdout, &stdOutput)
-	return
 }
 
 func (s *SecureShell) ExecuteCommand(cmd string) error {
 	session, err := s.client.NewSession()
 	if err != nil {
-		log.Printf("Failed to create session: %+v\n", err)
 		return err
 	}
 	defer session.Close()
-	return s.execute(func(stdOutput *bytes.Buffer, args ...string) error {
-		session.Stdout = stdOutput
-		session.Stderr = stdOutput
-		log.Printf("Execute command: %s\n", args[0])
-		return session.Run(args[0])
-	}, cmd)
+	stdout, _ := session.StdoutPipe()
+	log.Printf("Execute command: %s\n", cmd)
+	err = session.Start(cmd)
+	if err != nil {
+		return err
+	}
+	go io.Copy(s.output, stdout)
+	return session.Wait()
 }
 
 func (s *SecureShell) SecureCopyData(fileName string, data []byte, destinationPath string) error {
-	return s.execute(func(stdOutput *bytes.Buffer, args ...string) error {
-		session, err := s.client.NewSession()
-		if err != nil {
-			log.Printf("Failed to create session: %+v\n", err)
-			return err
-		}
-		defer session.Close()
-		var buf bytes.Buffer
-		length, err := buf.Write(data)
-		if err != nil {
-			log.Printf("Failed to load contents: %+v\n", err)
-			return err
-		}
-		return scp.Copy(int64(length), 0755, fileName, &buf, filepath.Join(destinationPath, fileName), session)
-	})
+	session, err := s.client.NewSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+	var buf bytes.Buffer
+	length, err := buf.Write(data)
+	if err != nil {
+		log.Printf("Failed to load contents: %+v\n", err)
+		return err
+	}
+	return scp.Copy(int64(length), 0755, fileName, &buf, filepath.Join(destinationPath, fileName), session)
 }
 
 func (s *SecureShell) SecureCopy(filePath string, destinationPath string) error {
-	return s.execute(func(stdOutput *bytes.Buffer, args ...string) error {
-		return filepath.Walk(filePath, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			session, err := s.client.NewSession()
-			if err != nil {
-				log.Printf("Failed to create session: %+v\n", err)
-				return err
-			}
-			defer session.Close()
-			session.Stdout = stdOutput
-			session.Stderr = stdOutput
-			if info.IsDir() {
-				log.Printf("From path: %s to path: %s\n", path, args[1])
-				return nil
-			}
-			log.Printf("From path: %s to path: %s\n", path, filepath.Join(args[1], info.Name()))
-			return scp.CopyPath(path, filepath.Join(args[1], info.Name()), session)
-		})
-	}, filePath, destinationPath)
+	session, err := s.client.NewSession()
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+	return filepath.Walk(filePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			log.Printf("From path: %s to path: %s\n", path, destinationPath)
+			return nil
+		}
+		log.Printf("From path: %s to path: %s\n", path, filepath.Join(destinationPath, info.Name()))
+		return scp.CopyPath(path, filepath.Join(destinationPath, info.Name()), session)
+	})
 }
 
 func (s *SecureShell) CheckDir(dir string) error {

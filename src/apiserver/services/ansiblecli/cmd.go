@@ -3,6 +3,7 @@ package ansiblecli
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 
@@ -20,20 +21,22 @@ type ansibleCli struct {
 	sshClient  *utils.SecureShell
 	install    *models.SimpleInstall
 	hosts      *models.Hosts
+	output     io.Writer
 	err        error
 }
 
-func NewClient() *ansibleCli {
+func NewClient(output io.Writer) *ansibleCli {
 	hostIP := beego.AppConfig.String("ansible::hostip")
 	command := beego.AppConfig.String("ansible::command")
 	sourcePath := beego.AppConfig.String("ansible::sourcepath")
 	workPath := beego.AppConfig.String("ansible::workpath")
-	return &ansibleCli{hostIP: hostIP, command: command, sourcePath: sourcePath, workPath: workPath}
+	return &ansibleCli{hostIP: hostIP, command: command,
+		sourcePath: sourcePath, workPath: workPath, output: output}
 }
 
 func (ac *ansibleCli) init() *ansibleCli {
 	var err error
-	ac.sshClient, err = utils.NewSecureShell()
+	ac.sshClient, err = utils.NewSecureShell(ac.output)
 	if err != nil {
 		ac.err = err
 		return ac

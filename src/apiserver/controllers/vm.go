@@ -48,7 +48,7 @@ func (v *VMController) Get() {
 func (v *VMController) Post() {
 	var vmWithSpec models.VMWithSpec
 	v.loadRequestBody(&vmWithSpec)
-	err := vagrantcli.NewClient(vmWithSpec).Create()
+	err := vagrantcli.NewClient(vmWithSpec, v.Ctx.ResponseWriter).Create()
 	v.handleError(err)
 }
 

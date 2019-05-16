@@ -24,7 +24,7 @@ func TestAnsibleCli(t *testing.T) {
 		models.PackageVO{Name: "golang", Tag: "1.10"},
 	}
 	t.Run("Ansible Install", func(t *testing.T) {
-		err := ansiblecli.NewClient().Install(vmWithSpec, pkgList)
+		err := ansiblecli.NewClient(os.Stdout).Install(vmWithSpec, pkgList)
 		assert := assert.New(t)
 		assert.Nil(err)
 	})

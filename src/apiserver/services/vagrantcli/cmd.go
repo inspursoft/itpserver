@@ -2,6 +2,7 @@ package vagrantcli
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 
@@ -17,19 +18,21 @@ type vagrantCli struct {
 	command    string
 	vmWithSpec models.VMWithSpec
 	sshClient  *utils.SecureShell
+	output     io.Writer
 	err        error
 }
 
-func NewClient(vmWithSpec models.VMWithSpec) *vagrantCli {
+func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *vagrantCli {
 	sourcePath := beego.AppConfig.String("vagrant::sourcepath")
 	workPath := beego.AppConfig.String("vagrant::workpath")
 	command := beego.AppConfig.String("vagrant::command")
-	return &vagrantCli{sourcePath: sourcePath, workPath: workPath, command: command, vmWithSpec: vmWithSpec}
+	return &vagrantCli{sourcePath: sourcePath, workPath: workPath,
+		command: command, vmWithSpec: vmWithSpec, output: output}
 }
 
 func (vc *vagrantCli) init() *vagrantCli {
 	var err error
-	vc.sshClient, err = utils.NewSecureShell()
+	vc.sshClient, err = utils.NewSecureShell(vc.output)
 	if err != nil {
 		vc.err = err
 		return vc
