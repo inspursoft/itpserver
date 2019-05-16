@@ -15,7 +15,7 @@ func main() {
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
-	beego.LoadAppConfig("ini", filepath.Join(appPath, "app-local.conf"))
+	beego.LoadAppConfig("ini", filepath.Join(appPath, "app.conf"))
 	dao.InitDB()
 	beego.Run()
 }
