@@ -43,7 +43,7 @@ func (ic *installationConf) getSpecifiedVMPackage(ID int64, pkgName, pkgTag stri
 		return nil, nil, ic.e
 	}
 	if pkg == nil {
-		ic.e.Notfound("VM", fmt.Errorf("No package was found with name: %s, tag: %s", pkgName, pkgTag))
+		ic.e.Notfound("Package", fmt.Errorf("name: %s, tag: %s", pkgName, pkgTag))
 		return nil, nil, ic.e
 	}
 	return
@@ -56,7 +56,7 @@ func (ic *installationConf) Install(ID int64, pkgName, pkgTag string) error {
 	}
 	exists := ic.daoHandler.CheckPackagesInstalledToVM(vm, pkg)
 	if exists {
-		ic.e.Conflict(fmt.Sprintf("name: %s with tag: %s on ID: %d", pkgName, pkgTag, ID), err)
+		ic.e.Conflict(fmt.Sprintf("name: %s with tag: %s on VM ID: %d", pkgName, pkgTag, ID), err)
 		return ic.e
 	}
 	_, err = ic.daoHandler.InstallPackageToVM(vm, pkg)

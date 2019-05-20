@@ -52,11 +52,17 @@ func TestOperateVM(t *testing.T) {
 		assert.Equal(int64(1), affected)
 		assert.Nil(err)
 	})
-	t.Run("DeleteVM", func(t *testing.T) {
-		query := models.VM{ID: v.ID}
-		affected, err := h.DeleteVM(query, "ID")
+	t.Run("DeleteVMWithVID", func(t *testing.T) {
+		affected, err := h.DeleteVMByVID("2d4e7f")
 		assert := assert.New(t)
 		assert.Equal(int64(1), affected)
 		assert.Nil(err)
 	})
+	// t.Run("DeleteVM", func(t *testing.T) {
+	// 	query := models.VM{ID: v.ID}
+	// 	affected, err := h.DeleteVM(query, "ID")
+	// 	assert := assert.New(t)
+	// 	assert.Equal(int64(1), affected)
+	// 	assert.Nil(err)
+	// })
 }

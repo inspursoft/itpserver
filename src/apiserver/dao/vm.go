@@ -94,6 +94,19 @@ func (v *VMDaoHandler) UpdateVMSpec(ID int64, updates map[string]interface{}) (a
 	return
 }
 
+func (v *VMDaoHandler) DeleteVMByVID(VID string) (affected int64, err error) {
+	o := orm.NewOrm()
+	affected, err = o.QueryTable("vm").RelatedSel().Filter("spec__vid", VID).Delete()
+	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
+		return
+	}
+	beego.Info(fmt.Sprintf("Successful delete VM with VID %s", VID))
+	return
+}
+
 func (v *VMDaoHandler) DeleteVM(query models.VM, cols ...string) (affected int64, err error) {
 	o := orm.NewOrm()
 	affected, err = o.Delete(&query, cols...)

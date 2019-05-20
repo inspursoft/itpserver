@@ -24,7 +24,7 @@ func (vc *vmConf) GetByField(value interface{}, field string) (vm *models.VM, er
 	if val, ok := value.(int64); ok {
 		query.ID = val
 	}
-	vm, err = vc.daoHandler.GetVM(query, "ID")
+	vm, err = vc.daoHandler.GetVM(query, field)
 	if err != nil {
 		vc.e.InternalError(err)
 		return nil, vc.e
@@ -46,6 +46,11 @@ func (vc *vmConf) GetByID(ID int64) (vm *models.VM, err error) {
 
 func (vc *vmConf) Exists(query models.VM) (exists bool, err error) {
 	vm, err := vc.daoHandler.GetVM(query, "IP")
+	if err != nil {
+		vc.e.InternalError(err)
+		return
+	}
+	vm, err = vc.daoHandler.GetVM(query, "Name")
 	if err != nil {
 		vc.e.InternalError(err)
 		return
@@ -83,7 +88,9 @@ func (vc *vmConf) Create(vmWithSpec models.VMWithSpec) error {
 		CPUs:    vmWithSpec.Spec.CPUs,
 		Storage: vmWithSpec.Spec.Storage,
 		Memory:  vmWithSpec.Spec.Memory,
-		Extras:  vmWithSpec.Spec.Extras}
+		Extras:  vmWithSpec.Spec.Extras,
+		VID:     vmWithSpec.Spec.VID,
+	}
 	_, err = vc.daoHandler.AddVM(&newVM, &spec)
 	if err != nil {
 		vc.e.InternalError(err)
@@ -97,20 +104,24 @@ func (vc *vmConf) UpdateVMID(ID int64, VID string) error {
 	_, err := vc.daoHandler.UpdateVMSpec(ID, updates)
 	if err != nil {
 		vc.e.InternalError(err)
+	}
+	return vc.e
+}
+
+func (vc *vmConf) DeleteByID(ID int64) error {
+	query := models.VM{ID: ID}
+	_, err := vc.daoHandler.DeleteVM(query, "ID")
+	if err != nil {
+		vc.e.InternalError(err)
 		return vc.e
 	}
 	return nil
 }
 
-func (vc *vmConf) DeleteByID(ID int64) error {
-	query := models.VM{ID: ID}
-	affected, err := vc.daoHandler.DeleteVM(query, "ID")
+func (vc *vmConf) DeleteVMByVID(VID string) error {
+	_, err := vc.daoHandler.DeleteVMByVID(VID)
 	if err != nil {
 		vc.e.InternalError(err)
-		return vc.e
-	}
-	if affected == 0 {
-		vc.e.Notfound(fmt.Sprintf("VM with ID: %d", ID), err)
 		return vc.e
 	}
 	return nil

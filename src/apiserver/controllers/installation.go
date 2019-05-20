@@ -48,7 +48,7 @@ func (ic *InstallationController) Post() {
 	}
 	var pkg models.PackageVO
 	ic.loadRequestBody(&pkg)
-	err = ansiblecli.NewClient(ic.Ctx.ResponseWriter).Install(vmWithSpec, []models.PackageVO{pkg})
+	err = ansiblecli.NewClient(vmWithSpec, ic.Ctx.ResponseWriter).Install([]models.PackageVO{pkg})
 	ic.handleError(err)
 }
 

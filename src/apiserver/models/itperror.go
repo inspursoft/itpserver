@@ -10,6 +10,10 @@ type ITPError struct {
 	statusCode int
 }
 
+func (e *ITPError) HasNoError() bool {
+	return e.Status() == 0 && e.errMessage == ""
+}
+
 func (e *ITPError) Error() string {
 	return e.errMessage
 }

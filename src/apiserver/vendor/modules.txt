@@ -9,13 +9,19 @@ github.com/astaxie/beego/logs
 github.com/astaxie/beego/session
 github.com/astaxie/beego/toolbox
 github.com/astaxie/beego/utils
+# github.com/davecgh/go-spew v1.1.0
+github.com/davecgh/go-spew/spew
 # github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1
 github.com/gopherjs/gopherjs/js
 # github.com/jtolds/gls v4.20.0+incompatible
 github.com/jtolds/gls
+# github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
+github.com/kballard/go-shellquote
 # github.com/lib/pq v1.0.0
 github.com/lib/pq
 github.com/lib/pq/oid
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
 # github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d
 github.com/smartystreets/assertions
 github.com/smartystreets/assertions/internal/go-render/render
@@ -24,8 +30,21 @@ github.com/smartystreets/assertions/internal/oglematchers
 github.com/smartystreets/goconvey/convey
 github.com/smartystreets/goconvey/convey/reporting
 github.com/smartystreets/goconvey/convey/gotest
+# github.com/stretchr/testify v1.3.0
+github.com/stretchr/testify/assert
+# github.com/tmc/scp v0.0.0-20170824174625-f7b48647feef
+github.com/tmc/scp
 # golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+golang.org/x/crypto/ssh
 golang.org/x/crypto/acme/autocert
+golang.org/x/crypto/curve25519
+golang.org/x/crypto/ed25519
+golang.org/x/crypto/internal/chacha20
+golang.org/x/crypto/poly1305
 golang.org/x/crypto/acme
+golang.org/x/crypto/ed25519/internal/edwards25519
+golang.org/x/crypto/internal/subtle
+# golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+golang.org/x/sys/cpu
 # gopkg.in/yaml.v2 v2.2.1
 gopkg.in/yaml.v2
