@@ -14,14 +14,6 @@ import (
 
 const appPath = "../../conf"
 
-func assertITPError(err error) *models.ITPError {
-	if err != nil {
-		if itpErr, ok := err.(*models.ITPError); ok {
-			return itpErr
-		}
-	}
-	return nil
-}
 func TestMain(m *testing.M) {
 	os.Setenv("templatepath", "../../templates")
 	beego.LoadAppConfig("ini", filepath.Join(appPath, "app.conf"))
@@ -38,7 +30,7 @@ func TestAnsibleCli(t *testing.T) {
 	t.Run("Ansible Install", func(t *testing.T) {
 		err := ansiblecli.NewClient(vmWithSpec, os.Stdout).Install(pkgList)
 		assert := assert.New(t)
-		itpErr := assertITPError(err)
+		itpErr := models.AssertITPError(err)
 		assert.True(itpErr.HasNoError())
 	})
 }

@@ -36,3 +36,12 @@ func (e *ITPError) InternalError(err error) {
 	e.errMessage = fmt.Sprintf("Internal error occurred: %+v", err)
 	e.statusCode = http.StatusInternalServerError
 }
+
+func AssertITPError(err error) *ITPError {
+	if err != nil {
+		if itpErr, ok := err.(*ITPError); ok {
+			return itpErr
+		}
+	}
+	return nil
+}

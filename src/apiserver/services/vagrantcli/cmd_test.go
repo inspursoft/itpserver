@@ -15,14 +15,6 @@ import (
 
 const appPath = "../../conf"
 
-func assertITPError(err error) *models.ITPError {
-	if err != nil {
-		if itpErr, ok := err.(*models.ITPError); ok {
-			return itpErr
-		}
-	}
-	return nil
-}
 func TestMain(m *testing.M) {
 	os.Setenv("templatepath", "../../templates")
 	beego.LoadAppConfig("ini", filepath.Join(appPath, "app.conf"))
@@ -33,7 +25,7 @@ func TestMain(m *testing.M) {
 }
 func TestVagrantCli(t *testing.T) {
 	vmWithSpec := models.VMWithSpec{
-		Name: "vm-30", OS: "ubuntu.box", IP: "172.28.128.30",
+		Name: "vm-31", OS: "ubuntu.box", IP: "172.28.128.31",
 		Spec: models.VMSpec{
 			CPUs:   1,
 			Memory: "1024",
@@ -42,13 +34,13 @@ func TestVagrantCli(t *testing.T) {
 	t.Run("Create VM", func(t *testing.T) {
 		err := vagrantcli.NewClient(vmWithSpec, os.Stdout).Create()
 		assert := assert.New(t)
-		itpErr := assertITPError(err)
+		itpErr := models.AssertITPError(err)
 		assert.True(itpErr.HasNoError())
 	})
 	t.Run("Halt VM", func(t *testing.T) {
 		err := vagrantcli.NewClient(vmWithSpec, os.Stdout).Halt()
 		assert := assert.New(t)
-		itpErr := assertITPError(err)
+		itpErr := models.AssertITPError(err)
 		assert.True(itpErr.HasNoError())
 	})
 	t.Run("Global status of VM", func(t *testing.T) {
@@ -56,13 +48,13 @@ func TestVagrantCli(t *testing.T) {
 		err := vagrantcli.NewClient(vmWithSpec, &buf).GlobalStatus()
 		beego.Debug(models.ResolveGlobalStatus(buf.String()))
 		assert := assert.New(t)
-		itpErr := assertITPError(err)
+		itpErr := models.AssertITPError(err)
 		assert.True(itpErr.HasNoError())
 	})
 	t.Run("Destroy VM", func(t *testing.T) {
 		err := vagrantcli.NewClient(vmWithSpec, os.Stdout).Destroy()
 		assert := assert.New(t)
-		itpErr := assertITPError(err)
+		itpErr := models.AssertITPError(err)
 		assert.True(itpErr.HasNoError())
 	})
 }
