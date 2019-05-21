@@ -93,12 +93,12 @@ func (s *SecureShell) SecureCopyData(fileName string, data []byte, destinationPa
 }
 
 func (s *SecureShell) SecureCopy(filePath string, destinationPath string) error {
-	session, err := s.client.NewSession()
-	if err != nil {
-		return err
-	}
-	defer session.Close()
 	return filepath.Walk(filePath, func(path string, info os.FileInfo, err error) error {
+		session, err := s.client.NewSession()
+		if err != nil {
+			return err
+		}
+		defer session.Close()
 		if err != nil {
 			return err
 		}

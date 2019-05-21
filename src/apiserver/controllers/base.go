@@ -45,7 +45,9 @@ func (bc *BaseController) handleError(err error) {
 				bc.CustomAbort(e.Status(), e.Error())
 			}
 		}
-		bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
+		if models.AssertITPError(err) != nil {
+			bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
+		}
 	}
 }
 

@@ -42,6 +42,7 @@ func AssertITPError(err error) *ITPError {
 		if itpErr, ok := err.(*ITPError); ok {
 			return itpErr
 		}
+		return err.(*ITPError)
 	}
 	return nil
 }

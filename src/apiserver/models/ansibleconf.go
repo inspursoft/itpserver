@@ -51,6 +51,6 @@ func YieldHosts(localIP string) *Hosts {
 	}
 }
 
-func (in *Hosts) AddTarget(name string, ipList []string) {
+func (in *Hosts) AddTarget(name string, ipList ...string) {
 	in.Target = HostItem{Name: name, IPs: ipList}
 }

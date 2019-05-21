@@ -24,11 +24,9 @@ func TestMain(m *testing.M) {
 }
 func TestAnsibleCli(t *testing.T) {
 	vmWithSpec := models.VMWithSpec{IP: "172.28.128.16"}
-	pkgList := []models.PackageVO{
-		models.PackageVO{Name: "golang", Tag: "1.10"},
-	}
+	pkg := models.PackageVO{Name: "golang", Tag: "1.10"}
 	t.Run("Ansible Install", func(t *testing.T) {
-		err := ansiblecli.NewClient(vmWithSpec, os.Stdout).Install(pkgList)
+		err := ansiblecli.NewClient(vmWithSpec, pkg, os.Stdout).Install()
 		assert := assert.New(t)
 		itpErr := models.AssertITPError(err)
 		assert.True(itpErr.HasNoError())

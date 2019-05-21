@@ -49,7 +49,8 @@ func (v *VMDaoHandler) GetVMList(vmWithSpec models.VMWithSpec) ([]*models.VM, er
 	q := o.QueryTable("vm")
 	if vmWithSpec.IP != "" {
 		q = q.Filter("IP", vmWithSpec.IP)
-	} else if vmWithSpec.Name != "" {
+	}
+	if vmWithSpec.Name != "" {
 		q = q.Filter("Name", vmWithSpec.Name)
 	}
 	var results []*models.VM

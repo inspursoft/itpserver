@@ -54,16 +54,17 @@ func (v *VMController) Post() {
 
 // @Title Delete
 // @Description Delete a virtual machine by ID.
-// @Param	id	path 	int64	true		"The virtual machine ID to be deleted."
-// @Success 200 {string} 	Successful deleted virtual machine by ID.
+// @Param	vm_name	query 	string	true		"The virtual machine name to be deleted."
+// @Success 200 {string} 	Successful deleted virtual machine by name.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @router /:id [delete]
+// @router /:vm_name [delete]
 func (v *VMController) Delete() {
-	ID := v.requiredID(":id")
-	err := services.NewVMHandler().DeleteByID(ID)
+	vmName := v.requiredParam("vm_name")
+	vmWithSpec := models.VMWithSpec{Name: vmName}
+	err := vagrantcli.NewClient(vmWithSpec, v.Ctx.ResponseWriter).Destroy()
 	v.handleError(err)
 }

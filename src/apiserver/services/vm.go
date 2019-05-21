@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/inspursoft/itpserver/src/apiserver/dao"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
@@ -16,46 +14,49 @@ func NewVMHandler() *vmConf {
 	return &vmConf{e: &models.ITPError{}}
 }
 
-func (vc *vmConf) GetByField(value interface{}, field string) (vm *models.VM, err error) {
+func (vc *vmConf) getByField(value interface{}, field string) (vm *models.VM, err error) {
 	query := models.VM{}
 	if str, ok := value.(string); ok {
-		query.IP = str
+		if field == "IP" {
+			query.IP = str
+		}
+		if field == "Name" {
+			query.Name = str
+		}
 	}
 	if val, ok := value.(int64); ok {
 		query.ID = val
 	}
 	vm, err = vc.daoHandler.GetVM(query, field)
 	if err != nil {
-		vc.e.InternalError(err)
 		return nil, vc.e
 	}
 	if vm == nil {
-		vc.e.Notfound("VM", fmt.Errorf("No VM was found %s with value:%+v", field, value))
-		return nil, vc.e
+		return nil, nil
 	}
 	return
 }
 
 func (vc *vmConf) GetByIP(IP string) (vm *models.VM, err error) {
-	return vc.GetByField(IP, "IP")
+	return vc.getByField(IP, "IP")
 }
 
 func (vc *vmConf) GetByID(ID int64) (vm *models.VM, err error) {
-	return vc.GetByField(ID, "ID")
+	return vc.getByField(ID, "ID")
+}
+
+func (vc *vmConf) GetByName(name string) (vm *models.VM, err error) {
+	return vc.getByField(name, "Name")
 }
 
 func (vc *vmConf) Exists(query models.VM) (exists bool, err error) {
-	vm, err := vc.daoHandler.GetVM(query, "IP")
+	vmWithSpec := models.VMWithSpec{Name: query.Name, IP: query.IP}
+	vms, err := vc.daoHandler.GetVMList(vmWithSpec)
 	if err != nil {
 		vc.e.InternalError(err)
 		return
 	}
-	vm, err = vc.daoHandler.GetVM(query, "Name")
-	if err != nil {
-		vc.e.InternalError(err)
-		return
-	}
-	exists = (vm != nil && vm.ID != 0)
+	exists = len(vms) > 0
 	return
 }
 

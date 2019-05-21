@@ -1,7 +1,6 @@
 package ansiblecli
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -16,10 +15,11 @@ import (
 
 type ansibleCli struct {
 	hostIP     string
-	command    string
+	uploadPath string
 	sourcePath string
 	workPath   string
 	vmWithSpec models.VMWithSpec
+	pkg        models.PackageVO
 	sshClient  *utils.SecureShell
 	install    *models.SimpleInstall
 	hosts      *models.Hosts
@@ -27,14 +27,16 @@ type ansibleCli struct {
 	err        *models.ITPError
 }
 
-func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *ansibleCli {
+func NewClient(vmWithSpec models.VMWithSpec, pkg models.PackageVO, output io.Writer) *ansibleCli {
 	hostIP := beego.AppConfig.String("ansible::hostip")
-	command := beego.AppConfig.String("ansible::command")
+	uploadPath := beego.AppConfig.String("ansible::uploadpath")
 	sourcePath := beego.AppConfig.String("ansible::sourcepath")
 	baseWorkPath := beego.AppConfig.String("ansible::baseworkpath")
-	ac := &ansibleCli{hostIP: hostIP, command: command, vmWithSpec: vmWithSpec,
-		sourcePath: sourcePath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
-		output: output, err: &models.ITPError{}}
+	ac := &ansibleCli{hostIP: hostIP,
+		vmWithSpec: vmWithSpec, pkg: pkg,
+		uploadPath: uploadPath, sourcePath: sourcePath,
+		workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
+		output:   output, err: &models.ITPError{}}
 	var err error
 	ac.sshClient, err = utils.NewSecureShell(ac.output)
 	if err != nil {
@@ -62,65 +64,99 @@ func (ac *ansibleCli) init() *ansibleCli {
 	return ac
 }
 
-func (ac *ansibleCli) copySources() *ansibleCli {
+func (ac *ansibleCli) transferPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
-	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cp -R %s/* %s", ac.sourcePath, ac.workPath))
+	vmName := ac.vmWithSpec.Name
+	if vmName == "" {
+		ac.err.Notfound("VM", fmt.Errorf("VM name is required"))
+		return ac
+	}
+	uploadSourcePath := filepath.Join(ac.uploadPath, vmName)
+	err := ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
 	if err != nil {
 		ac.err.InternalError(err)
 	}
 	return ac
 }
 
-func (ac *ansibleCli) generateInstall(pkgList []models.PackageVO) *ansibleCli {
+func (ac *ansibleCli) unzipPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
-	ac.install = &models.SimpleInstall{PkgName: pkgList[0].Name}
+	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && unzip %s", ac.workPath, ac.pkg.SourceName))
+	if err != nil {
+		ac.err.InternalError(err)
+	}
+	return ac
+}
+
+func (ac *ansibleCli) generateInstall() *ansibleCli {
+	if !ac.err.HasNoError() {
+		return ac
+	}
+	ac.install = &models.SimpleInstall{PkgName: ac.pkg.Name}
 	output, err := utils.ExecuteTemplate(ac.install, "install.yml")
 	if err != nil {
 		ac.err.InternalError(err)
 		return ac
 	}
-	err = ac.sshClient.SecureCopyData("install.yml", output, ac.workPath)
+	targetPath := filepath.Join(ac.workPath, ac.pkg.Name)
+	err = ac.sshClient.SecureCopyData("install.yml", output, targetPath)
 	if err != nil {
 		ac.err.InternalError(err)
 	}
 	return ac
 }
 
-func (ac *ansibleCli) generateHosts(ipList ...string) *ansibleCli {
+func (ac *ansibleCli) generateHosts() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
+	vm, err := services.NewVMHandler().GetByName(ac.vmWithSpec.Name)
+	if err != nil {
+		ac.err.InternalError(err)
+		return ac
+	}
 	ac.hosts = models.YieldHosts(ac.hostIP)
-	ac.hosts.AddTarget("install", ipList)
+	ac.hosts.AddTarget("install", vm.IP)
 	output, err := utils.ExecuteTemplate(ac.hosts, "hosts")
 	if err != nil {
 		ac.err.InternalError(err)
 		return ac
 	}
-	err = ac.sshClient.SecureCopyData("hosts", output, ac.workPath)
+	targetPath := filepath.Join(ac.workPath, ac.pkg.Name)
+	err = ac.sshClient.SecureCopyData("hosts", output, targetPath)
 	if err != nil {
 		ac.err.InternalError(err)
 	}
 	return ac
 }
 
-func (ac *ansibleCli) executeCommand(action string) *ansibleCli {
+func (ac *ansibleCli) executeCommand(command string) *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
-	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && sh ssh.sh %s && %s %s", ac.workPath,
-		ac.vmWithSpec.IP, ac.command, action))
+	err := ac.sshClient.ExecuteCommand(command)
 	if err != nil {
 		ac.err.InternalError(err)
 	}
 	return ac
 }
 
-func (ac *ansibleCli) record(pkgList []models.PackageVO) *ansibleCli {
+func (ac *ansibleCli) recordPackage() *ansibleCli {
+	if !ac.err.HasNoError() {
+		return ac
+	}
+	err := services.NewPackageHandler().Create(ac.pkg)
+	if err != nil {
+		ac.err.InternalError(err)
+	}
+	return ac
+}
+
+func (ac *ansibleCli) recordInstall() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
@@ -129,26 +165,33 @@ func (ac *ansibleCli) record(pkgList []models.PackageVO) *ansibleCli {
 		ac.err.InternalError(err)
 		return ac
 	}
-	pkg := pkgList[0]
-	err = services.NewInstallationHandler().Install(vm.ID, pkg.Name, pkg.Tag)
+	err = services.NewInstallationHandler().Install(vm.ID, ac.pkg.Name, ac.pkg.Tag)
 	if err != nil {
 		ac.err.InternalError(err)
 	}
 	return ac
 }
 
-func (ac *ansibleCli) Install(pkgList []models.PackageVO) error {
-	if len(pkgList) == 0 {
-		return errors.New("No package to install")
-	}
+func (ac *ansibleCli) Transfer() error {
 	ac.init().
-		copySources().
-		generateInstall(pkgList).
-		generateHosts(ac.vmWithSpec.IP).
-		executeCommand("-i hosts install.yml").
-		record(pkgList)
+		transferPackage().
+		unzipPackage().
+		generateInstall().
+		generateHosts().
+		recordPackage()
+	if !ac.err.HasNoError() && ac.err != nil {
+		beego.Error(fmt.Sprintf("Failed to transfer package to server: %+v", ac.err))
+		return ac.err
+	}
+	return nil
+}
 
-	if ac.err != nil {
+func (ac *ansibleCli) Install() error {
+	targetPath := filepath.Join(ac.workPath, ac.pkg.Name)
+	ac.init().
+		executeCommand(fmt.Sprintf("cd %s && ansible-playbook -i hosts install.yml", targetPath)).
+		recordInstall()
+	if !ac.err.HasNoError() && ac.err != nil {
 		beego.Error(fmt.Sprintf("Failed to execute Ansible client: %+v", ac.err))
 		return ac.err
 	}
