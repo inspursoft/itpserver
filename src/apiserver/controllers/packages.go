@@ -19,6 +19,7 @@ type PackagesController struct {
 
 // @Title Get
 // @Description Return a list of software packages.
+// @Param Authorization	header	string	true	"Set authorization info."
 // @Param	name	query 	string	false		"The software package name to return"
 // @Param tag	query string false "The software package tag to return"
 // @Success 200 {string} 		Successful get all or filter software packages by name.
@@ -46,6 +47,7 @@ func (pc *PackagesController) Get() {
 
 // @Title Post
 // @Description Upload software package.
+// @Param Authorization	header	string	true	"Set authorization info."
 // @Param vm_name	formData	string	true	"The VM name to install package."
 // @Param	pkg	formData	file	true		"The package to be uploaded."
 // @Success 200 {string} 		Successful submitted information about software package.
@@ -90,6 +92,7 @@ func (pc *PackagesController) Upload() {
 
 // @Title Delete
 // @Description Delete software package by name and tag.
+// @Param Authorization	header	string	true	"Set authorization info."
 // @Param	package_name	query 	string	true		"The software package name to be deleted."
 // @Param	package_tag		query 	string	true		"The software package tag to be deleted."
 // @Success 200 {string} 		Successful submitted information about software package.

@@ -13,6 +13,11 @@ import (
 
 func init() {
 	ns := beego.NewNamespace("/v1",
+		beego.NSNamespace("/auth",
+			beego.NSInclude(
+				&controllers.AuthController{},
+			),
+		),
 		beego.NSNamespace("/vms",
 			beego.NSInclude(
 				&controllers.VMController{},
