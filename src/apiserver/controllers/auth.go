@@ -14,6 +14,15 @@ type AuthController struct {
 	BaseController
 }
 
+// @Title Get
+// @Description Returns token info registered from Keycloak.
+// @Success 200 {string} 	Successful returned token info from Keycloak.
+// @Failure 400 Bad request.
+// @Failure 401 Unauthorized.
+// @Failure 403 The resouce specified was forbidden to access.
+// @Failure 404 The resource specified was not found.
+// @Failure 500 Internal error occurred at server side.
+// @router / [get]
 func (ac *AuthController) Get() {}
 
 func (ac *AuthController) Prepare() {
