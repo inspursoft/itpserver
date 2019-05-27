@@ -94,7 +94,7 @@ func (pc *PackagesController) Upload() {
 // @Description Delete software package by name and tag.
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	package_name	query 	string	true		"The software package name to be deleted."
-// @Param	package_tag		query 	string	true		"The software package tag to be deleted."
+// @Param	package_tag		query 	string	false		"The software package tag to be deleted."
 // @Success 200 {string} 		Successful submitted information about software package.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
@@ -104,7 +104,7 @@ func (pc *PackagesController) Upload() {
 // @router / [delete]
 func (pc *PackagesController) Delete() {
 	pkgName := pc.requiredParam("package_name")
-	pkgTag := pc.requiredParam("package_tag")
+	pkgTag := pc.GetString("pkg_tag", "")
 	err := services.NewPackageHandler().Delete(pkgName, pkgTag)
 	pc.handleError(err)
 }
