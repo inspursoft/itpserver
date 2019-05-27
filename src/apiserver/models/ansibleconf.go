@@ -1,7 +1,11 @@
 package models
 
+type SimpleInstall struct {
+	PkgName string
+}
+
 type Install struct {
-	Items []InstallItem `yaml:"install"`
+	Items []InstallItem `yaml:"installs"`
 }
 
 type InstallItem struct {
@@ -47,6 +51,6 @@ func YieldHosts(localIP string) *Hosts {
 	}
 }
 
-func (in *Hosts) AddTarget(name string, ipList []string) {
+func (in *Hosts) AddTarget(name string, ipList ...string) {
 	in.Target = HostItem{Name: name, IPs: ipList}
 }

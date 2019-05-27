@@ -1,7 +1,12 @@
 package vagrantcli
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"path/filepath"
+
+	"github.com/inspursoft/itpserver/src/apiserver/services"
 
 	"github.com/astaxie/beego"
 
@@ -10,36 +15,168 @@ import (
 )
 
 type vagrantCli struct {
-	workpath string
-	err      error
+	sourcePath string
+	workPath   string
+	command    string
+	vmWithSpec models.VMWithSpec
+	sshClient  *utils.SecureShell
+	output     io.Writer
+	err        *models.ITPError
 }
 
-func NewClient(workpath string) *vagrantCli {
-	return &vagrantCli{workpath: workpath}
+func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *vagrantCli {
+	sourcePath := beego.AppConfig.String("vagrant::sourcepath")
+	baseWorkPath := beego.AppConfig.String("vagrant::baseworkpath")
+	vc := &vagrantCli{sourcePath: sourcePath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
+		vmWithSpec: vmWithSpec, output: output, err: &models.ITPError{}}
+	var err error
+	vc.sshClient, err = utils.NewSecureShell(vc.output)
+	if err != nil {
+		vc.err.InternalError(err)
+	}
+	return vc
 }
 
 func (vc *vagrantCli) init() *vagrantCli {
-	err := utils.CheckDir(vc.workpath)
+	vmIP := vc.vmWithSpec.IP
+	vmName := vc.vmWithSpec.Name
+	exists, err := services.NewVMHandler().Exists(models.VM{IP: vmIP, Name: vmName})
 	if err != nil {
-		vc.err = err
+		vc.err.InternalError(err)
 		return vc
+	}
+	if exists {
+		vc.err.Conflict(fmt.Sprintf("VM name: %s or IP: %s", vmName, vmIP), fmt.Errorf("VM already exists with IP: %s or Name: %s", vmIP, vmName))
+		return vc
+	}
+	err = vc.sshClient.CheckDir(vc.workPath)
+	if err != nil {
+		vc.err.InternalError(err)
 	}
 	return vc
 }
 
-func (vc *vagrantCli) generateConfig(vmWithSpec models.VMWithSpec) *vagrantCli {
-	err := utils.ExecuteTemplate(vmWithSpec, "Vagrantfile", vc.workpath)
-	if err != nil {
-		vc.err = err
+func (vc *vagrantCli) copySources() *vagrantCli {
+	if !vc.err.HasNoError() {
 		return vc
+	}
+	err := vc.sshClient.ExecuteCommand(fmt.Sprintf("cp -R %s/* %s", vc.sourcePath, vc.workPath))
+	if err != nil {
+		vc.err.InternalError(err)
 	}
 	return vc
 }
 
-func (vc *vagrantCli) CreateVM(vmWithSpec models.VMWithSpec) error {
-	vc.init().generateConfig(vmWithSpec)
-	if vc.err != nil {
+func (vc *vagrantCli) generateConfig() *vagrantCli {
+	if !vc.err.HasNoError() {
+		return vc
+	}
+	output, err := utils.ExecuteTemplate(vc.vmWithSpec, "Vagrantfile")
+	if err != nil {
+		vc.err.InternalError(err)
+		return vc
+	}
+	err = vc.sshClient.SecureCopyData("Vagrantfile", output, vc.workPath)
+	if err != nil {
+		vc.err.InternalError(err)
+	}
+	return vc
+}
+
+func (vc *vagrantCli) executeCommand(command string) *vagrantCli {
+	if !vc.err.HasNoError() {
+		return vc
+	}
+	err := vc.sshClient.ExecuteCommand(command)
+	if err != nil {
+		vc.err.InternalError(err)
+	}
+	return vc
+}
+func (vc *vagrantCli) loadSpec() *vagrantCli {
+	vm, err := services.NewVMHandler().GetByName(vc.vmWithSpec.Name)
+	if err != nil {
+		vc.err.InternalError(err)
+		return vc
+	}
+	if vm == nil {
+		vc.err.Notfound("VM", fmt.Errorf("VM with name: %s does not exist", vc.vmWithSpec.Name))
+		return vc
+	}
+	vc.vmWithSpec.Spec = *vm.Spec
+	return vc
+}
+func (vc *vagrantCli) updateVID() *vagrantCli {
+	if !vc.err.HasNoError() {
+		return vc
+	}
+	var buf bytes.Buffer
+	NewClient(vc.vmWithSpec, &buf).GlobalStatus()
+	globalStatusList := models.ResolveGlobalStatus(buf.String())
+	vc.vmWithSpec.Spec.VID = models.GetVIDByWorkPath(globalStatusList, vc.workPath)
+	beego.Debug(fmt.Sprintf("Update VM: %s with VID: %s", vc.vmWithSpec.Name, vc.vmWithSpec.Spec.VID))
+	return vc
+}
+
+func (vc *vagrantCli) record() *vagrantCli {
+	if !vc.err.HasNoError() {
+		return vc
+	}
+	err := services.NewVMHandler().Create(vc.vmWithSpec)
+	if err != nil {
+		vc.err.InternalError(err)
+	}
+	return vc
+}
+
+func (vc *vagrantCli) remove() *vagrantCli {
+	if !vc.err.HasNoError() {
+		return vc
+	}
+	beego.Debug("Removing VM with VID: %s", vc.vmWithSpec.Spec.VID)
+	err := services.NewVMHandler().DeleteVMByVID(vc.vmWithSpec.Spec.VID)
+	if err != nil {
+		vc.err.InternalError(err)
+	}
+	return vc
+}
+
+func (vc *vagrantCli) Create() error {
+	vc.init().
+		copySources().
+		generateConfig().
+		executeCommand(fmt.Sprintf("cd %s && vagrant up && sh ssh.sh %s", vc.workPath, vc.vmWithSpec.IP)).
+		updateVID().
+		record()
+	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to create VM with Vagrant: %+v", vc.err))
+		return vc.err
+	}
+	return nil
+}
+
+func (vc *vagrantCli) Halt() error {
+	vc.executeCommand(fmt.Sprintf("cd %s && vagrant halt", vc.workPath))
+	if !vc.err.HasNoError() && vc.err != nil {
+		beego.Error(fmt.Sprintf("Failed to halt VM with error: %+v", vc.err))
+		return vc.err
+	}
+	return nil
+}
+
+func (vc *vagrantCli) Destroy() error {
+	vc.loadSpec().executeCommand(fmt.Sprintf("vagrant destroy -f %s", vc.vmWithSpec.Spec.VID)).remove()
+	if !vc.err.HasNoError() && vc.err != nil {
+		beego.Error(fmt.Sprintf("Failed to destroy VM with error: %+v", vc.err))
+		return vc.err
+	}
+	return nil
+}
+
+func (vc *vagrantCli) GlobalStatus() error {
+	vc.executeCommand("vagrant global-status")
+	if !vc.err.HasNoError() && vc.err != nil {
+		beego.Error(fmt.Sprintf("Failed to get global status of VM with error: %+v", vc.err))
 		return vc.err
 	}
 	return nil

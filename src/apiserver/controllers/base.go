@@ -1,17 +1,71 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/astaxie/beego"
+	oidc "github.com/coreos/go-oidc"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
+	"golang.org/x/oauth2"
 )
+
+var configURL = beego.AppConfig.String("keycloak::configurl")
+var clientID = beego.AppConfig.String("keycloak::clientid")
+var clientSecret = beego.AppConfig.String("keycloak::clientsecret")
+var state = beego.AppConfig.String("keycloak::state")
+var redirectURL = beego.AppConfig.String("keycloak::redirecturl")
 
 type BaseController struct {
 	beego.Controller
+}
+
+func (bc *BaseController) Prepare() {
+	ctx := context.Background()
+	provider, err := oidc.NewProvider(ctx, configURL)
+	if err != nil {
+		bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Failed to create provider: %+v", err))
+	}
+	oauth2Config := oauth2.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectURL,
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+	}
+	oidcConfig := &oidc.Config{
+		ClientID: clientID,
+	}
+	verifier := provider.Verifier(oidcConfig)
+	v := bc.GetSession("token")
+	var token string
+	if v != nil {
+		if t, ok := v.(string); ok {
+			token = t
+		}
+	} else {
+		rawAccessToken := bc.Ctx.Input.Header("Authorization")
+		if rawAccessToken == "" {
+			bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusFound)
+			return
+		}
+		if !strings.HasPrefix(rawAccessToken, "Bearer") {
+			rawAccessToken = "Bearer " + rawAccessToken
+		}
+		parts := strings.Split(rawAccessToken, " ")
+		if len(parts) != 2 {
+			bc.CustomAbort(http.StatusBadRequest, "Invalid authorization header info.")
+		}
+		token = parts[1]
+	}
+	_, err = verifier.Verify(ctx, token)
+	if err != nil {
+		bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusUnauthorized)
+		return
+	}
 }
 
 func (bc *BaseController) requiredID(key string) int64 {
@@ -40,10 +94,14 @@ func (bc *BaseController) loadRequestBody(target interface{}) {
 func (bc *BaseController) handleError(err error) {
 	if err != nil {
 		if e, ok := err.(*models.ITPError); ok {
-			fmt.Printf("%+v\n", e)
-			bc.CustomAbort(e.Status(), e.Error())
+			if e.Status() > 400 {
+				fmt.Printf("%+v\n", e)
+				bc.CustomAbort(e.Status(), e.Error())
+			}
 		}
-		bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
+		if models.AssertITPError(err) != nil {
+			bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
+		}
 	}
 }
 

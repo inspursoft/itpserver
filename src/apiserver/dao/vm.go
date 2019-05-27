@@ -49,7 +49,8 @@ func (v *VMDaoHandler) GetVMList(vmWithSpec models.VMWithSpec) ([]*models.VM, er
 	q := o.QueryTable("vm")
 	if vmWithSpec.IP != "" {
 		q = q.Filter("IP", vmWithSpec.IP)
-	} else if vmWithSpec.Name != "" {
+	}
+	if vmWithSpec.Name != "" {
 		q = q.Filter("Name", vmWithSpec.Name)
 	}
 	var results []*models.VM
@@ -91,6 +92,19 @@ func (v *VMDaoHandler) UpdateVMSpec(ID int64, updates map[string]interface{}) (a
 		return
 	}
 	beego.Info(fmt.Sprintf("Successful update VM ID %d item(s) with updates: %+v", ID, updates))
+	return
+}
+
+func (v *VMDaoHandler) DeleteVMByVID(VID string) (affected int64, err error) {
+	o := orm.NewOrm()
+	affected, err = o.QueryTable("vm").RelatedSel().Filter("spec__vid", VID).Delete()
+	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
+		return
+	}
+	beego.Info(fmt.Sprintf("Successful delete VM with VID %s", VID))
 	return
 }
 
