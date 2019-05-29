@@ -13,16 +13,16 @@ import (
 
 func init() {
 	ns := beego.NewNamespace("/v1",
-		// beego.NSNamespace("/session",
-		// 	beego.NSInclude(
-		// 		&controllers.BaseController{},
-		// 	),
-		// ),
-		// beego.NSNamespace("/auth",
-		// 	beego.NSInclude(
-		// 		&controllers.AuthController{},
-		// 	),
-		// ),
+		beego.NSNamespace("/session",
+			beego.NSInclude(
+				&controllers.BaseController{},
+			),
+		),
+		beego.NSNamespace("/auth",
+			beego.NSInclude(
+				&controllers.AuthController{},
+			),
+		),
 		beego.NSNamespace("/vms",
 			beego.NSInclude(
 				&controllers.VMController{},
