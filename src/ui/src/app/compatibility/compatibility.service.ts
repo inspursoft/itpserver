@@ -21,8 +21,10 @@ export class CompatibilityService {
     }).pipe(map(res => plainToClass(Vm, res)));
   }
 
-  deleteVm(vmId: string): Observable<any> {
-    return this.http.delete(`/v1/vms/${vmId}`);
+  deleteVm(vmName: string): Observable<any> {
+    return this.http.delete(`/v1/vms/${vmName}`, {
+      params: {vm_name: vmName}
+    });
   }
 
   deletePackage(packageName, packageTag: string): Observable<any> {
@@ -39,23 +41,23 @@ export class CompatibilityService {
       .pipe(map(res => plainToClass(Package, res)));
   }
 
-  getInstallationList(vmId: number): Observable<Array<Installation>> {
+  getInstallationList(vmName: string): Observable<Array<Installation>> {
     return this.http.get<Array<Installation>>(`/v1/installations`, {
       params: {
-        id: vmId.toString()
+        vm_name: vmName
       }
     }).pipe(map(res => plainToClass(Installation, res)));
   }
 
-  createInstallation(vmId: number, packageName, packageTag: string): Observable<any> {
-    return this.http.post(`/v1/installations/${vmId}`, {
+  createInstallation(vmName: string, packageName, packageTag: string): Observable<any> {
+    return this.http.post(`/v1/installations/${vmName}`, {
       package_name: packageName,
       package_tag: packageTag
-    });
+    }, {responseType: 'text'});
   }
 
-  deleteInstallation(vmId: number, installation: Installation): Observable<any> {
-    return this.http.delete(`/v1/installations/${vmId}`, {
+  deleteInstallation(vmName: string, installation: Installation): Observable<any> {
+    return this.http.delete(`/v1/installations/${vmName}`, {
       params: {
         pkg_name: installation.name,
         pkg_tag: installation.tag

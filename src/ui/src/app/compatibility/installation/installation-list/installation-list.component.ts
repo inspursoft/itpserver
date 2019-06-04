@@ -16,6 +16,7 @@ export class InstallationListComponent implements OnInit {
   packageList: Array<Package>;
   selectedVm: Vm;
   selectedPackage: Package;
+  installationWip = false;
 
   constructor(private service: CompatibilityService,
               private messageService: NzMessageService,
@@ -31,7 +32,9 @@ export class InstallationListComponent implements OnInit {
   }
 
   pre(): void {
-    this.current -= 1;
+    if (!this.installationWip) {
+      this.current -= 1;
+    }
   }
 
   next(): void {
@@ -39,28 +42,35 @@ export class InstallationListComponent implements OnInit {
   }
 
   createInstallation() {
-    if (!this.selectedVm) {
-      this.messageService.warning('请选择测试环境');
-    } else if (!this.selectedPackage) {
-      this.messageService.warning('请选择工具集');
-    } else {
-      this.service.createInstallation(this.selectedVm.id, this.selectedPackage.name, this.selectedPackage.tag).subscribe(
-        () => this.messageService.success('安装成功'),
-        () => this.messageService.warning('安装失败'),
-        () => {
-          this.selectedPackage = null;
-          this.selectedVm = null;
-          this.current = 0;
-        });
+    if (!this.installationWip) {
+      if (!this.selectedVm) {
+        this.messageService.warning('请选择测试环境');
+      } else if (!this.selectedPackage) {
+        this.messageService.warning('请选择工具集');
+      } else {
+        this.installationWip = true;
+        this.service.createInstallation(this.selectedVm.name, this.selectedPackage.name, this.selectedPackage.tag).subscribe(
+          (logs: string) => {
+            this.sharedActionService.createLogsViewer(logs);
+            this.selectedPackage = null;
+            this.selectedVm = null;
+            this.current = 0;
+            this.installationWip = false;
+          },
+          () => {
+            this.messageService.warning('安装失败');
+            this.installationWip = false;
+          });
+      }
     }
   }
 
-  showDetailInfo(vmId: number, event: Event) {
+  showDetailInfo(vmName: string, event: Event) {
     event.stopPropagation();
     const modal = this.modalService.create({
       nzTitle: '详细信息',
       nzContent: VmDetailComponent,
-      nzComponentParams: {Id: vmId},
+      nzComponentParams: {vmName},
       nzFooter: [{
         label: '确定',
         shape: 'primary',
@@ -80,21 +90,21 @@ export class InstallationListComponent implements OnInit {
   }
 
   createPackage() {
-    this.sharedActionService.createPackage().subscribe((packageInfo: Package) => {
-      if (packageInfo) {
-        this.packageList.push(packageInfo);
-        this.selectedPackage = packageInfo;
-        this.current += 1;
+    this.sharedActionService.createPackage().subscribe((logs: string) => {
+      if (logs) {
+        this.sharedActionService.createLogsViewer(logs).subscribe(() => {
+          this.service.getPackageList().subscribe((res: Array<Package>) => this.packageList = res);
+        });
       }
     });
   }
 
   createVm() {
-    this.sharedActionService.createVm().subscribe((vm: Vm) => {
-      if (vm) {
-        this.vmList.push(vm);
-        this.selectedVm = vm;
-        this.current += 1;
+    this.sharedActionService.createVm().subscribe((logs: string) => {
+      if (logs) {
+        this.sharedActionService.createLogsViewer(logs).subscribe(() => {
+          this.service.getVmList().subscribe((res: Array<Vm>) => this.vmList = res);
+        });
       }
     });
   }

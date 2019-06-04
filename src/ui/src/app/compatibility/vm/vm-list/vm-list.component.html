@@ -8,6 +8,9 @@
   </a>
   <button nz-button nzType="primary" style="margin-left: auto" (click)="createVm()">创建测试环境</button>
 </div>
+<div *ngIf="deleteVmWIP" nz-row nzType="flex" [nzJustify]="'center'">
+  <i nz-icon style="font-size: 24px;" nzType="loading" nzTheme="outline"></i>删除中，请稍后...
+</div>
 <div nz-row nzType="flex" *ngIf="viewModel == 1">
   <nz-card *ngFor="let vm of vmList" [nzCover]="customLogoTemplate">
     <nz-card-meta [nzTitle]="vm.name" [nzDescription]="vm.os"></nz-card-meta>
@@ -15,12 +18,14 @@
     <h4>Memory:{{vm.spec.memory}}</h4>
     <h4>Storage:{{vm.spec.storage}}</h4>
     <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
-      <a (click)="showDetailInfo(vm.id)">
-        <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+      <a [class.disabled]="deleteVmWIP" (click)="showDetailInfo(vm.name)">
+        <i  nz-icon nzType="info-circle" nzTheme="outline"></i>
       </a>
       <nz-divider nzType="vertical"></nz-divider>
-      <i nz-icon nzType="delete" nzTheme="outline"></i>
-      <a (click)="deleteVm(vm.id)">Delete</a>
+      <a (click)="deleteVm(vm.name)">
+        <i [class.disabled]="deleteVmWIP" nz-icon nzType="delete" nzTheme="outline"></i>
+        Delete
+      </a>
     </div>
   </nz-card>
 </div>
@@ -55,10 +60,12 @@
     <td>{{ vm.spec.memory }}</td>
     <td>{{ vm.spec.storage }}</td>
     <td>
-      <i nz-icon nzType="delete" nzTheme="outline"></i>
-      <a (click)="deleteVm(vm.id)">Delete</a>
+      <a [class.disabled]="deleteVmWIP" (click)="deleteVm(vm.name)">
+        <i nz-icon nzType="delete" nzTheme="outline"></i>
+        Delete
+      </a>
       <nz-divider nzType="vertical"></nz-divider>
-      <a (click)="showDetailInfo(vm.id)">
+      <a  [class.disabled]="deleteVmWIP" (click)="showDetailInfo(vm.name)">
         <i nz-icon nzType="info-circle" nzTheme="outline"></i>
       </a>
     </td>

@@ -55,9 +55,9 @@ export class PackageListComponent implements OnInit {
   }
 
   createPackage() {
-    this.sharedActionService.createPackage().subscribe((p: Package) => {
-      if (p) {
-        this.retrieve();
+    this.sharedActionService.createPackage().subscribe((logs: string) => {
+      if (logs) {
+        this.sharedActionService.createLogsViewer(logs).subscribe(() => this.retrieve());
       }
     });
   }

@@ -10,8 +10,8 @@ export class VmSpec {
   get postBody(): object {
     return {
       cpus: this.cpus,
-      memory: `${this.memory}MB`,
-      storage: `${this.storage}GB`
+      memory: `${this.memory}`,
+      storage: `${this.storage}G`
     };
   }
 }
@@ -43,13 +43,7 @@ export class Package {
   @Expose({name: 'package_id'}) id: number;
   @Expose({name: 'package_name'}) name: string;
   @Expose({name: 'package_tag'}) tag: string;
-
-  postBody(): object {
-    return {
-      package_name: this.name,
-      package_tag: this.tag
-    };
-  }
+  @Expose({name: 'vm_name'}) vmName: string;
 }
 
 export class Installation {

@@ -9,7 +9,7 @@ import {NzModalRef} from 'ng-zorro-antd';
   styleUrls: ['./vm-detail.component.less']
 })
 export class VmDetailComponent implements OnInit {
-  @Input() Id: number;
+  @Input() vmName: string;
   installationList: Array<Installation>;
   loading = false;
   pageIndex = 1;
@@ -26,7 +26,7 @@ export class VmDetailComponent implements OnInit {
 
   retrieve() {
     this.loading = true;
-    this.service.getInstallationList(this.Id).subscribe(
+    this.service.getInstallationList(this.vmName).subscribe(
       (res: Array<Installation>) => this.installationList = res,
       () => this.loading = false,
       () => this.loading = false
@@ -34,7 +34,7 @@ export class VmDetailComponent implements OnInit {
   }
 
   deleteInstallation(installation: Installation) {
-    this.service.deleteInstallation(this.Id, installation).subscribe(
+    this.service.deleteInstallation(this.vmName, installation).subscribe(
       () => this.retrieve(),
       () => this.modal.destroy()
     );

@@ -1,5 +1,16 @@
 version: "3.7"
 services:
+  itpserver-proxy:
+    build:
+      context: ../
+      dockerfile: ./containers/proxy/Dockerfile
+    image: itpserver_proxy
+    restart: always
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:z
+      - ../src/ui/dist:/usr/share/nginx/html:z
+    ports: 
+      - 80:80
   postgredb:
     build:
       context: ../
@@ -13,7 +24,7 @@ services:
     env_file:
       - ../conf/db/db.env
     volumes:
-      - /Users/wangkun/data/itp-db:/var/lib/postgresql/data
+      - /Users/yanqing/docker_volumes/itp-db:/var/lib/postgresql/data
     networks:
       itp:
         aliases: 

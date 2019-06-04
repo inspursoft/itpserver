@@ -17,6 +17,7 @@ export class VmListComponent implements OnInit {
   loading = false;
   pageIndex = 1;
   pageSize = 10;
+  deleteVmWIP = false;
   viewModel: ViewModel = ViewModel.list;
 
   constructor(private service: CompatibilityService,
@@ -30,11 +31,11 @@ export class VmListComponent implements OnInit {
     this.retrieve();
   }
 
-  showListModel(){
+  showListModel() {
     this.viewModel = ViewModel.list;
   }
 
-  showCardModel(){
+  showCardModel() {
     this.viewModel = ViewModel.card;
   }
 
@@ -47,36 +48,48 @@ export class VmListComponent implements OnInit {
     );
   }
 
-  deleteVm(vmId: string) {
-    this.modalService.confirm({
-      nzTitle: '删除',
-      nzContent: '<b style="color: red;">确定要删除该测试环境?</b>',
-      nzOkText: 'Yes',
-      nzOkType: 'danger',
-      nzOnOk: () => this.deleteAction(vmId),
-      nzCancelText: 'No'
-    });
+  deleteVm(vmName: string) {
+    if (!this.deleteVmWIP) {
+      this.modalService.confirm({
+        nzTitle: '删除',
+        nzContent: '<b style="color: red;">确定要删除该测试环境?</b>',
+        nzOkText: 'Yes',
+        nzOkType: 'danger',
+        nzOkLoading: this.deleteVmWIP,
+        nzOnOk: () => this.deleteAction(vmName),
+        nzCancelText: 'No'
+      });
+    }
   }
 
-  deleteAction(vmId: string) {
-    this.service.deleteVm(vmId).subscribe(
+  deleteAction(vmName: string) {
+    this.deleteVmWIP = true;
+    this.service.deleteVm(vmName).subscribe(
       () => this.messageService.success('删除测试环境成功！'),
-      () => this.messageService.warning('删除测试环境失败！'),
-      () => this.retrieve()
+      () => {
+        this.messageService.warning('删除测试环境失败！');
+        this.deleteVmWIP = false;
+      },
+      () => {
+        this.retrieve();
+        this.deleteVmWIP = false;
+      }
     );
   }
 
-  showDetailInfo(vmId: number) {
-    const modal = this.modalService.create({
-      nzTitle: '详细信息',
-      nzContent: VmDetailComponent,
-      nzComponentParams: {Id: vmId},
-      nzFooter: [{
-        label: '确定',
-        shape: 'primary',
-        onClick: () => modal.destroy()
-      }]
-    });
+  showDetailInfo(vmName: string) {
+    if (!this.deleteVmWIP) {
+      const modal = this.modalService.create({
+        nzTitle: '详细信息',
+        nzContent: VmDetailComponent,
+        nzComponentParams: {vmName},
+        nzFooter: [{
+          label: '确定',
+          shape: 'primary',
+          onClick: () => modal.destroy()
+        }]
+      });
+    }
   }
 
   createVm() {

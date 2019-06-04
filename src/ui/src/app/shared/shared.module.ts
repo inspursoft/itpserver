@@ -9,12 +9,14 @@ import { CreateVmComponent } from './create-vm/create-vm.component';
 import { SharedService } from './shared.service';
 import { SharedActionService } from './shared.action.service';
 import { CreatePackageComponent } from './create-package/create-package.component';
+import { LogViewerComponent } from './log-viewer/log-viewer.component';
 
 @NgModule({
   declarations: [
     Error404Component,
     CreateVmComponent,
-    CreatePackageComponent
+    CreatePackageComponent,
+    LogViewerComponent
   ],
   providers: [
     SharedService,
@@ -23,7 +25,8 @@ import { CreatePackageComponent } from './create-package/create-package.componen
   ],
   entryComponents: [
     CreateVmComponent,
-    CreatePackageComponent
+    CreatePackageComponent,
+    LogViewerComponent
   ],
   imports: [
     ReactiveFormsModule,

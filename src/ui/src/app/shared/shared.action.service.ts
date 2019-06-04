@@ -3,13 +3,15 @@ import { Observable } from 'rxjs';
 import { ModalButtonOptions, NzMessageService, NzModalRef, NzModalService } from 'ng-zorro-antd';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { CreateVmComponent } from './create-vm/create-vm.component';
-import { Package, Vm } from '../compatibility/compatibility.type';
+import { Vm } from '../compatibility/compatibility.type';
 import { CreatePackageComponent } from './create-package/create-package.component';
+import { LogViewerComponent } from './log-viewer/log-viewer.component';
 
 @Injectable({providedIn: 'root'})
 export class SharedActionService {
   private vmModalRef: NzModalRef;
   private packageModalRef: NzModalRef;
+  private logViewerModalRef: NzModalRef;
 
   private createVmAction(instance: CreateVmComponent) {
     if (instance.vmFormGroup.valid) {
@@ -26,13 +28,9 @@ export class SharedActionService {
       restButtonOption.disabled = true;
       cancelButtonOption.disabled = true;
       createButtonOption.loading = true;
-      this.http.post(`/v1/vms`, newVm.postBody()).subscribe(
-        () => {
-          this.messageService.success('创建成功');
-          restButtonOption.disabled = false;
-          cancelButtonOption.disabled = false;
-          createButtonOption.loading = false;
-        },
+      instance.setDisabled(true);
+      this.http.post(`/v1/vms`, newVm.postBody(), {responseType: 'text'}).subscribe(
+        (res: string) => this.vmModalRef.close(res),
         (err: HttpErrorResponse) => {
           if (err.status === 409) {
             this.messageService.error('测试环境ID已经存在');
@@ -42,8 +40,8 @@ export class SharedActionService {
           restButtonOption.disabled = false;
           cancelButtonOption.disabled = false;
           createButtonOption.loading = false;
-        },
-        () => this.vmModalRef.close(newVm)
+          instance.setDisabled(false);
+        }
       );
     } else {
       this.messageService.error('填写完整表单！');
@@ -51,34 +49,34 @@ export class SharedActionService {
   }
 
   private createPackageAction(instance: CreatePackageComponent) {
-    if (instance.packageFromGroup.valid) {
-      const newPackage = new Package();
+    if (instance.packageFromGroup.valid && instance.fileList.length > 0) {
       const restButtonOption: ModalButtonOptions = this.packageModalRef.getInstance().nzFooter[0];
       const cancelButtonOption: ModalButtonOptions = this.packageModalRef.getInstance().nzFooter[1];
       const createButtonOption: ModalButtonOptions = this.packageModalRef.getInstance().nzFooter[2];
-      newPackage.name = instance.packageFromGroup.get('name').value;
-      newPackage.tag = instance.packageFromGroup.get('tag').value;
+      const formData = new FormData();
+      let vmName = instance.packageFromGroup.get('vmName').value;
+      vmName = instance.packageFromGroup.get('vmName').value;
+      formData.append('pkg', instance.fileList[0] as any);
       restButtonOption.disabled = true;
       cancelButtonOption.disabled = true;
       createButtonOption.loading = true;
-      this.http.post(`/v1/packages`, newPackage.postBody()).subscribe(
-        () => {
-          this.messageService.success('创建成功');
-          restButtonOption.disabled = false;
-          cancelButtonOption.disabled = false;
-          createButtonOption.loading = false;
-        },
+      instance.setDisabled(true);
+      this.http.post(`/v1/packages`, formData, {
+        responseType: 'text',
+        params: {vm_name: vmName}
+      }).subscribe(
+        (res: string) => this.packageModalRef.close(res),
         (err: HttpErrorResponse) => {
           if (err.status === 409) {
-            this.messageService.error('测试环境ID已经存在');
+            this.messageService.error('Package已经存在');
           } else {
             this.messageService.error('创建失败');
           }
           restButtonOption.disabled = false;
           cancelButtonOption.disabled = false;
           createButtonOption.loading = false;
-        },
-        () => this.packageModalRef.close(newPackage)
+          instance.setDisabled(false);
+        }
       );
     } else {
       this.messageService.error('填写完整表单！');
@@ -134,5 +132,22 @@ export class SharedActionService {
       }]
     });
     return this.packageModalRef.afterClose;
+  }
+
+  createLogsViewer(logs: string): Observable<any> {
+    this.logViewerModalRef = this.modalService.create({
+      nzTitle: `Logs`,
+      nzContent: LogViewerComponent,
+      nzClosable: false,
+      nzMaskClosable: false,
+      nzWidth: 960,
+      nzComponentParams: {logs},
+      nzFooter: [{
+        label: '关闭',
+        shape: 'primary',
+        onClick: () => this.logViewerModalRef.destroy()
+      }]
+    });
+    return this.logViewerModalRef.afterClose;
   }
 }

@@ -1,3 +1,6 @@
+<div *ngIf="installationWip" nz-row nzType="flex" [nzJustify]="'center'">
+  <i nz-icon style="font-size: 24px;" nzType="loading" nzTheme="outline"></i>安装中，请稍后...
+</div>
 <div nz-row nzType="flex" nzJustify="center">
   <div style="width: 1024px;margin-top: 40px;">
     <nz-steps [nzCurrent]="current">
@@ -29,7 +32,7 @@
       <h4>Memory:{{vm.spec.memory}}</h4>
       <h4>Storage:{{vm.spec.storage}}</h4>
       <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
-        <a (click)="showDetailInfo(vm.id, $event)">
+        <a (click)="showDetailInfo(vm.name, $event)">
           <i nz-icon nzType="info-circle" nzTheme="outline"></i>
         </a>
       </div>
@@ -43,20 +46,6 @@
 </ng-template>
 
 <ng-template #packageInfo>
-  <div nz-row nzType="flex" [nzAlign]="'middle'">
-    <nz-card class="vm" [nzCover]="vmCover">
-      <nz-card-meta [nzTitle]="selectedVm.name" [nzDescription]="selectedVm.os"></nz-card-meta>
-      <h4>Cpus:{{selectedVm.spec.cpus}}</h4>
-      <h4>Memory:{{selectedVm.spec.memory}}</h4>
-      <h4>Storage:{{selectedVm.spec.storage}}</h4>
-      <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
-        <a (click)="showDetailInfo(selectedVm.id, $event)">
-          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
-        </a>
-      </div>
-    </nz-card>
-    <i nz-icon style="font-size: 72px;color: lightblue" nzType="plus" nzTheme="outline"></i>
-  </div>
   <div nz-row nzType="flex">
     <nz-card class="package-info"
              *ngFor="let packageInfo of packageList"
@@ -86,7 +75,7 @@
       <h4>Memory:{{selectedVm.spec.memory}}</h4>
       <h4>Storage:{{selectedVm.spec.storage}}</h4>
       <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
-        <a (click)="showDetailInfo(selectedVm.id, $event)">
+        <a (click)="showDetailInfo(selectedVm.name, $event)">
           <i nz-icon nzType="info-circle" nzTheme="outline"></i>
         </a>
       </div>
@@ -96,11 +85,11 @@
       <nz-card-meta [nzTitle]="selectedPackage.name" [nzDescription]="selectedPackage.tag"></nz-card-meta>
     </nz-card>
     <i nz-icon style="font-size: 72px;color: lightblue" nzType="double-right" nzTheme="outline"></i>
-    <a (click)="createInstallation()">
+    <a [class.disabled]="installationWip" (click)="createInstallation()">
       <i style="font-size: 48px;" nz-icon nzType="download" nzTheme="outline"></i>
     </a>
     <div nz-row nzType="flex" style="margin: auto 5px 5px">
-      <a (click)="pre()">
+      <a [class.disabled]="installationWip" (click)="pre()">
         <i style="font-size: 24px;" nz-icon nzType="left-circle" nzTheme="outline"></i>
       </a>
     </div>

@@ -1,14 +1,14 @@
 <form nz-form [formGroup]="vmFormGroup">
   <nz-form-item>
-    <nz-form-label nzRequired [nzSpan]="7">测试环境ID</nz-form-label>
+    <nz-form-label nzRequired [nzSpan]="7">测试环境IP</nz-form-label>
     <nz-form-control [nzSpan]="17" nzHasFeedback>
-      <input nz-input formControlName="vmIp" placeholder="输入环境ID"/>
+      <input nz-input formControlName="vmIp" placeholder="测试环境IP"/>
       <nz-form-explain
         *ngIf="
         (vmFormGroup.get('vmIp')?.dirty && vmFormGroup.get('vmIp')?.errors)||
         vmFormGroup.get('vmIp')?.pending">
         <ng-container *ngIf="vmFormGroup.get('vmIp')?.hasError('required')">
-          请输入测试环境ID
+          请输入测试环境IP
         </ng-container>
         <ng-container *ngIf="vmFormGroup.get('vmIp')?.hasError('duplicated')">
           测试环境ID已存在
@@ -45,7 +45,7 @@
     <nz-form-label nzRequired [nzSpan]="7">选择基础镜像</nz-form-label>
     <nz-form-control [nzSpan]="17" nzHasFeedback>
       <nz-select nzPlaceHolder="选择基础镜像" formControlName="vmOs">
-        <nz-option nzLabel="Ubuntu7" nzValue="Ubuntu7"></nz-option>
+        <nz-option nzLabel="ubuntu.box" nzValue="ubuntu.box"></nz-option>
         <nz-option nzLabel="CentOs" nzValue="CentOs"></nz-option>
       </nz-select>
       <nz-form-explain
