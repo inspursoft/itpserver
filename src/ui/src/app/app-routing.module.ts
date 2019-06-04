@@ -8,8 +8,8 @@ import { AppAuthGuardService } from './app-guard.service';
 const routes: Routes = [
   {
     path: '',
-    // canActivate: [AppAuthGuardService],
-    // canActivateChild: [AppAuthGuardService],
+    canActivate: [AppAuthGuardService],
+    canActivateChild: [AppAuthGuardService],
     component: MainContentComponent,
     children: [
       {path: RouteCompatibility, loadChildren: './compatibility/compatibility.module#CompatibilityModule'}

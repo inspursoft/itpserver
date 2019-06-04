@@ -28,12 +28,12 @@ const icons: IconDefinition[] = [AccountBookFill, AlertOutline, AlertFill];
     SharedModule
   ],
   providers: [
-    // {
-    //   provide: APP_INITIALIZER,
-    //   useFactory: initializer,
-    //   multi: true,
-    //   deps: [KeycloakService]
-    // },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializer,
+      multi: true,
+      deps: [KeycloakService]
+    },
     {provide: NZ_ICONS, useValue: icons}],
   bootstrap: [AppComponent]
 })

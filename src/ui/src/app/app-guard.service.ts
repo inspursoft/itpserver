@@ -32,12 +32,9 @@ export class AppAuthGuardService extends KeycloakAuthGuard {
   }
 
   isAccessAllowed(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
-    console.log('isAccessAllowed');
     return new Promise((resolve, reject) => {
       if (!this.authenticated) {
-        this.keycloakAngular.login({redirectUri: 'http://10.164.17.1/compatibility/installation'}).then(() => {
-          this.keycloakAngular.getToken().then(res => console.log(res));
-        });
+        this.keycloakAngular.login();
         return;
       }
 
