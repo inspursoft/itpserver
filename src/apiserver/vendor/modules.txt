@@ -1,5 +1,6 @@
 # github.com/astaxie/beego v1.11.1
 github.com/astaxie/beego
+github.com/astaxie/beego/plugins/cors
 github.com/astaxie/beego/orm
 github.com/astaxie/beego/context/param
 github.com/astaxie/beego/config
