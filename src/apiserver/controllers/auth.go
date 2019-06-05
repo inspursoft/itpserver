@@ -64,7 +64,6 @@ func (ac *AuthController) Prepare() {
 	if err := idToken.Claims(&resp.IDTokenClaims); err != nil {
 		ac.CustomAbort(http.StatusInternalServerError, err.Error())
 	}
-	ac.SetSession("token", resp.OAuth2Token.AccessToken)
 	ac.Data["json"] = resp
 	ac.ServeJSON()
 }
