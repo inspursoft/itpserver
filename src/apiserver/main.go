@@ -17,7 +17,6 @@ func main() {
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
 	beego.LoadAppConfig("ini", filepath.Join(appPath, "app.conf"))
-	dao.InitDB()
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "HEAD"},
@@ -25,5 +24,6 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
+	dao.InitDB()
 	beego.Run()
 }
