@@ -7,15 +7,15 @@
       <li nz-menu-item [nzSelected]="true">兼容性测试</li>
       <nz-dropdown [nzPlacement]="'bottomRight'">
         <div nz-dropdown class="login-container">
-          <a>Username</a>
+          <a>{{userDetails?.username}}</a>
           <i nz-icon type="down"></i>
         </div>
         <ul nz-menu>
-          <li nz-menu-item style="min-width: 164px;">
-            <a>账户设置</a>
+          <li nz-menu-item nzDisabled style="min-width: 164px;">
+            账户设置
           </li>
           <li nz-menu-divider></li>
-          <li nz-menu-item nzDisabled>退出登录</li>
+          <li nz-menu-item (click)="doLogout()">退出登录</li>
         </ul>
       </nz-dropdown>
     </ul>

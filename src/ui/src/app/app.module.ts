@@ -10,7 +10,6 @@ import { AccountBookFill, AlertFill, AlertOutline } from '@ant-design/icons-angu
 import { NZ_ICONS } from 'ng-zorro-antd';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 import { initializer } from './app-init';
-import { HttpClientJsonpModule } from '@angular/common/http';
 
 const icons: IconDefinition[] = [AccountBookFill, AlertOutline, AlertFill];
 
@@ -24,7 +23,6 @@ const icons: IconDefinition[] = [AccountBookFill, AlertOutline, AlertFill];
     BrowserAnimationsModule,
     KeycloakAngularModule,
     AppRoutingModule,
-    HttpClientJsonpModule,
     SharedModule
   ],
   providers: [
