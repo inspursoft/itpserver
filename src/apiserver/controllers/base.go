@@ -63,7 +63,7 @@ func (bc *BaseController) Prepare() {
 	}
 	_, err = verifier.Verify(ctx, token)
 	if err != nil {
-		bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusUnauthorized)
+		// bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusUnauthorized)
 		return
 	}
 }
