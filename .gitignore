@@ -1,7 +1,6 @@
 .DS_Store
 itpserver
 *.tmp
-src/apiserver/routers/*_controllers.go
 src/apiserver/apiserver
 src/apiserver/swagger
 src/apiserver/conf/app-local.conf
