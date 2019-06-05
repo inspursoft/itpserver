@@ -8,7 +8,7 @@ services:
     env_file:
       - ../conf/db/db.env
     volumes:
-      - /Users/wangkun/data/itp-db:/var/lib/postgresql/data
+      - /data/itp-db:/var/lib/postgresql/data
     networks:
       - itp
   apiserver:

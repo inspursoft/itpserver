@@ -1,0 +1,31 @@
+<nz-table nzBordered
+          [nzData]="installationList"
+          [nzLoading]="loading"
+          nzShowPagination
+          nzShowSizeChanger
+          [nzTotal]="installationList.length"
+          [(nzPageIndex)]="pageIndex"
+          [(nzPageSize)]="pageSize">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Tag</th>
+    <th>Options</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let installation of installationList">
+    <td>{{ installation.name }}</td>
+    <td>{{ installation.tag }}</td>
+    <td>
+      <i nz-icon nzType="delete" nzTheme="outline"></i>
+      <a nz-popconfirm
+         nzTitle="Are you sure?"
+         nzOkText="ok"
+         nzCancelText="cancel"
+         (nzOnConfirm)="deleteInstallation(installation)">Delete</a>
+      <nz-divider nzType="vertical"></nz-divider>
+    </td>
+  </tr>
+  </tbody>
+</nz-table>

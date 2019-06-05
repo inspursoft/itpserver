@@ -1,0 +1,74 @@
+<div nz-row nzType="flex" [nzJustify]="'start'" [nzAlign]="'middle'">
+  <a (click)="showListModel()">
+    <i nz-icon nzType="bars" nzTheme="outline"></i>
+  </a>
+  <nz-divider nzType="vertical"></nz-divider>
+  <a (click)="showCardModel()">
+    <i nz-icon nzType="idcard" nzTheme="outline"></i>
+  </a>
+  <button nz-button nzType="primary" style="margin-left: auto" (click)="createVm()">创建测试环境</button>
+</div>
+<div *ngIf="deleteVmWIP" nz-row nzType="flex" [nzJustify]="'center'">
+  <i nz-icon style="font-size: 24px;" nzType="loading" nzTheme="outline"></i>删除中，请稍后...
+</div>
+<div nz-row nzType="flex" *ngIf="viewModel == 1">
+  <nz-card *ngFor="let vm of vmList" [nzCover]="customLogoTemplate">
+    <nz-card-meta [nzTitle]="vm.name" [nzDescription]="vm.os"></nz-card-meta>
+    <h4>Cpus:{{vm.spec.cpus}}</h4>
+    <h4>Memory:{{vm.spec.memory}}</h4>
+    <h4>Storage:{{vm.spec.storage}}</h4>
+    <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
+      <a [class.disabled]="deleteVmWIP" (click)="showDetailInfo(vm.name)">
+        <i  nz-icon nzType="info-circle" nzTheme="outline"></i>
+      </a>
+      <nz-divider nzType="vertical"></nz-divider>
+      <a (click)="deleteVm(vm.name)">
+        <i [class.disabled]="deleteVmWIP" nz-icon nzType="delete" nzTheme="outline"></i>
+        Delete
+      </a>
+    </div>
+  </nz-card>
+</div>
+<ng-template #customLogoTemplate>
+  <img alt="" src="../../../../assets/images/your-logo-here.png">
+</ng-template>
+<nz-table *ngIf="viewModel == 0"
+          nzBordered
+          nzShowPagination
+          nzShowSizeChanger
+          [nzTotal]="vmList.length"
+          [(nzPageIndex)]="pageIndex"
+          [(nzPageSize)]="pageSize"
+          [nzData]="vmList" [nzLoading]="loading">
+  <thead>
+  <tr>
+    <th>Name</th>
+    <th>Os</th>
+    <th>Cpus</th>
+    <th>Extras</th>
+    <th>Memory</th>
+    <th>Storage</th>
+    <th>Options</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let vm of vmList">
+    <td>{{ vm.name }}</td>
+    <td>{{ vm.os }}</td>
+    <td>{{ vm.spec.cpus }}</td>
+    <td>{{ vm.spec.extras }}</td>
+    <td>{{ vm.spec.memory }}</td>
+    <td>{{ vm.spec.storage }}</td>
+    <td>
+      <a [class.disabled]="deleteVmWIP" (click)="deleteVm(vm.name)">
+        <i nz-icon nzType="delete" nzTheme="outline"></i>
+        Delete
+      </a>
+      <nz-divider nzType="vertical"></nz-divider>
+      <a  [class.disabled]="deleteVmWIP" (click)="showDetailInfo(vm.name)">
+        <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+      </a>
+    </td>
+  </tr>
+  </tbody>
+</nz-table>
