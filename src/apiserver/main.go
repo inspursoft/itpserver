@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/plugins/cors"
 	"github.com/inspursoft/itpserver/src/apiserver/dao"
 	_ "github.com/inspursoft/itpserver/src/apiserver/routers"
 )
@@ -17,5 +18,12 @@ func main() {
 	}
 	beego.LoadAppConfig("ini", filepath.Join(appPath, "app.conf"))
 	dao.InitDB()
+	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 	beego.Run()
 }
