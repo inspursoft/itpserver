@@ -40,30 +40,21 @@ func (bc *BaseController) Prepare() {
 		ClientID: clientID,
 	}
 	verifier := provider.Verifier(oidcConfig)
-	v := bc.GetSession("token")
-	var token string
-	if v != nil {
-		if t, ok := v.(string); ok {
-			token = t
-		}
-	} else {
-		rawAccessToken := bc.Ctx.Input.Header("Authorization")
-		if rawAccessToken == "" {
-			bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusFound)
-			return
-		}
-		if !strings.HasPrefix(rawAccessToken, "Bearer") {
-			rawAccessToken = "Bearer " + rawAccessToken
-		}
-		parts := strings.Split(rawAccessToken, " ")
-		if len(parts) != 2 {
-			bc.CustomAbort(http.StatusBadRequest, "Invalid authorization header info.")
-		}
-		token = parts[1]
+	rawAccessToken := bc.Ctx.Input.Header("Authorization")
+	if rawAccessToken == "" {
+		bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusFound)
+		return
 	}
-	_, err = verifier.Verify(ctx, token)
+	if !strings.HasPrefix(rawAccessToken, "Bearer") {
+		rawAccessToken = "Bearer " + rawAccessToken
+	}
+	parts := strings.Split(rawAccessToken, " ")
+	if len(parts) != 2 {
+		bc.CustomAbort(http.StatusBadRequest, "Invalid authorization header info.")
+	}
+	_, err = verifier.Verify(ctx, parts[1])
 	if err != nil {
-		// bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusUnauthorized)
+		bc.Redirect(oauth2Config.AuthCodeURL(state), http.StatusUnauthorized)
 		return
 	}
 }
