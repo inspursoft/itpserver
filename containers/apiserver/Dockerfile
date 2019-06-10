@@ -1,8 +1,12 @@
 FROM 10.111.25.119/library/golang:1.12.4-alpine3.9
 
-RUN mkdir -p /go/src/github.com/inspursoft/itpserver/src
+RUN mkdir -p /go/src/github.com/inspursoft/itpserver/src \
+ && echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories \
+ && apk --no-cache --no-progress add git \
+ && go get github.com/beego/bee
+
 COPY src/apiserver /go/src/github.com/inspursoft/itpserver/src/apiserver
 WORKDIR /go/src/github.com/inspursoft/itpserver/src/apiserver
-RUN go build -v -o /go/bin/apiserver && chmod u+x /go/bin/apiserver
-CMD [ "/go/bin/apiserver" ]
+
+CMD [ "bee", "run", "-gendoc=true", "-downdoc=true" ]
 EXPOSE 8088
