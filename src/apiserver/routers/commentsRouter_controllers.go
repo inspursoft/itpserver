@@ -52,6 +52,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:OneStepController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:OneStepController"],
+        beego.ControllerComments{
+            Method: "Post",
+            Router: `/`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"],
         beego.ControllerComments{
             Method: "Get",

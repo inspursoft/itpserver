@@ -38,6 +38,11 @@ func init() {
 				&controllers.InstallationController{},
 			),
 		),
+		beego.NSNamespace("/onestep",
+			beego.NSInclude(
+				&controllers.OneStepController{},
+			),
+		),
 	)
 	beego.AddNamespace(ns)
 }

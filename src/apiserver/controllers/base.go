@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -109,6 +111,20 @@ func (bc *BaseController) serveStatus(status int, message string) {
 func (bc *BaseController) serveJSON(target interface{}) {
 	bc.Data["json"] = target
 	bc.ServeJSON()
+}
+
+func (bc *BaseController) resolveURL(targetURL string) string {
+	return fmt.Sprintf("%s:%d%s", bc.Ctx.Input.Site(), bc.Ctx.Input.Port(), bc.URLFor(targetURL))
+}
+
+func (bc *BaseController) proxiedRequest(method string, requestData interface{}, URLFor string) {
+	requestBody, err := json.Marshal(requestData)
+	bc.handleError(err)
+	req, err := http.NewRequest(method, bc.resolveURL(URLFor), bytes.NewBuffer(requestBody))
+	bc.handleError(err)
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	io.Copy(bc.Ctx.ResponseWriter, resp.Body)
 }
 
 // @Title Get
