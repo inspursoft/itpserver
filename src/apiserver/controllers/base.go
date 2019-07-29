@@ -121,6 +121,7 @@ func (bc *BaseController) proxiedRequest(method string, requestData interface{},
 	requestBody, err := json.Marshal(requestData)
 	bc.handleError(err)
 	req, err := http.NewRequest(method, bc.resolveURL(URLFor), bytes.NewBuffer(requestBody))
+	req.Header.Set("Authorization", bc.Ctx.Input.Header("Authorization"))
 	bc.handleError(err)
 	client := &http.Client{}
 	resp, err := client.Do(req)

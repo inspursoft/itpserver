@@ -17,6 +17,7 @@ import (
 type vagrantCli struct {
 	sourcePath string
 	workPath   string
+	outputPath string
 	command    string
 	vmWithSpec models.VMWithSpec
 	sshClient  *utils.SecureShell
@@ -27,8 +28,9 @@ type vagrantCli struct {
 func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *vagrantCli {
 	sourcePath := beego.AppConfig.String("vagrant::sourcepath")
 	baseWorkPath := beego.AppConfig.String("vagrant::baseworkpath")
+	outputPath := beego.AppConfig.String("vagrant::outputpath")
 	vc := &vagrantCli{sourcePath: sourcePath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
-		vmWithSpec: vmWithSpec, output: output, err: &models.ITPError{}}
+		outputPath: outputPath, vmWithSpec: vmWithSpec, output: output, err: &models.ITPError{}}
 	var err error
 	vc.sshClient, err = utils.NewSecureShell(vc.output)
 	if err != nil {
@@ -50,6 +52,10 @@ func (vc *vagrantCli) init() *vagrantCli {
 		return vc
 	}
 	err = vc.sshClient.CheckDir(vc.workPath)
+	if err != nil {
+		vc.err.InternalError(err)
+	}
+	err = vc.sshClient.CheckDir(vc.outputPath)
 	if err != nil {
 		vc.err.InternalError(err)
 	}
@@ -177,6 +183,15 @@ func (vc *vagrantCli) GlobalStatus() error {
 	vc.executeCommand("vagrant global-status")
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to get global status of VM with error: %+v", vc.err))
+		return vc.err
+	}
+	return nil
+}
+
+func (vc *vagrantCli) Package() error {
+	vc.loadSpec().updateVID().executeCommand(fmt.Sprintf("vagrant package %s --output %s", vc.vmWithSpec.Spec.VID, filepath.Join(vc.outputPath, fmt.Sprintf("%s.box", vc.vmWithSpec.Name))))
+	if !vc.err.HasNoError() && vc.err != nil {
+		beego.Error(fmt.Sprintf("Failed to package VM with error: %+v", vc.err))
 		return vc.err
 	}
 	return nil
