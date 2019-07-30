@@ -113,14 +113,14 @@ func (bc *BaseController) serveJSON(target interface{}) {
 	bc.ServeJSON()
 }
 
-func (bc *BaseController) resolveURL(targetURL string) string {
-	return fmt.Sprintf("%s:%d%s", bc.Ctx.Input.Site(), bc.Ctx.Input.Port(), bc.URLFor(targetURL))
+func (bc *BaseController) resolveURL(targetURL string, values ...interface{}) string {
+	return fmt.Sprintf("%s:%d%s", bc.Ctx.Input.Site(), bc.Ctx.Input.Port(), bc.URLFor(targetURL, values...))
 }
 
-func (bc *BaseController) proxiedRequest(method string, requestData interface{}, URLFor string) {
+func (bc *BaseController) proxiedRequest(method string, requestData interface{}, urlFor string, values ...interface{}) {
 	requestBody, err := json.Marshal(requestData)
 	bc.handleError(err)
-	req, err := http.NewRequest(method, bc.resolveURL(URLFor), bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest(method, bc.resolveURL(urlFor, values...), bytes.NewBuffer(requestBody))
 	req.Header.Set("Authorization", bc.Ctx.Input.Header("Authorization"))
 	bc.handleError(err)
 	client := &http.Client{}

@@ -26,7 +26,7 @@ func (ic *OneStepController) Post() {
 	var oneStep models.OneStepInstallation
 	ic.loadRequestBody(&oneStep)
 	ic.proxiedRequest(http.MethodPost, oneStep.VMWithSpec, "VMController.Post")
-	ic.proxiedRequest(http.MethodPost, oneStep.PackageVO, "PackagesController.Post")
+	ic.proxiedRequest(http.MethodPost, oneStep.PackageVO, "InstallationController.Post", ":vm_name", oneStep.VMWithSpec.Name)
 	err := vagrantcli.NewClient(*oneStep.VMWithSpec, ic.Ctx.ResponseWriter).Package()
 	ic.handleError(err)
 }
