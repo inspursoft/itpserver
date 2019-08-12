@@ -1,0 +1,117 @@
+<form nz-form [formGroup]="vmFormGroup">
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">测试环境IP</nz-form-label>
+    <nz-form-control [nzSpan]="17" nzHasFeedback>
+      <input nz-input formControlName="vmIp" placeholder="测试环境IP"/>
+      <nz-form-explain
+        *ngIf="
+        (vmFormGroup.get('vmIp')?.dirty && vmFormGroup.get('vmIp')?.errors)||
+        vmFormGroup.get('vmIp')?.pending">
+        <ng-container *ngIf="vmFormGroup.get('vmIp')?.hasError('required')">
+          请输入测试环境IP
+        </ng-container>
+        <ng-container *ngIf="vmFormGroup.get('vmIp')?.hasError('duplicated')">
+          测试环境ID已存在
+        </ng-container>
+        <ng-container *ngIf="vmFormGroup.get('vmIp')?.pending">
+          验证中...
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">测试环境名称</nz-form-label>
+    <nz-form-control [nzSpan]="17" nzHasFeedback>
+      <input nz-input formControlName="vmName" placeholder="输入环境名称"/>
+      <nz-form-explain
+        *ngIf="
+        (vmFormGroup.get('vmName')?.dirty && vmFormGroup.get('vmName')?.errors)||
+        vmFormGroup.get('vmName')?.pending">
+        <ng-container *ngIf="vmFormGroup.get('vmName')?.hasError('required')">
+          请输入测试环境名称
+        </ng-container>
+        <ng-container *ngIf="vmFormGroup.get('vmName')?.hasError('duplicated')">
+          测试环境名称已存在
+        </ng-container>
+        <ng-container *ngIf="vmFormGroup.get('vmName')?.pending">
+          验证中...
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">选择基础镜像</nz-form-label>
+    <nz-form-control [nzSpan]="17" nzHasFeedback>
+      <nz-select nzPlaceHolder="选择基础镜像" formControlName="vmOs">
+        <nz-option nzLabel="ubuntu.box" nzValue="ubuntu.box"></nz-option>
+        <nz-option nzLabel="CentOs" nzValue="CentOs"></nz-option>
+      </nz-select>
+      <nz-form-explain
+        *ngIf="(
+        vmFormGroup.get('vmOs')?.dirty && vmFormGroup.get('vmOs')?.errors)||
+        vmFormGroup.get('vmOs')?.pending">
+        <ng-container *ngIf="vmFormGroup.get('vmOs')?.hasError('required')">
+          请选择测试环境基础镜像
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">Cpu个数</nz-form-label>
+    <nz-form-control [nzSpan]="12" nzHasFeedback>
+      <nz-input-number formControlName="vmCpu"></nz-input-number>
+      <nz-form-explain
+        *ngIf="
+        (vmFormGroup.get('vmCpu')?.dirty && vmFormGroup.get('vmCpu')?.errors)||
+        vmFormGroup.get('vmCpu')?.pending">
+        <ng-container *ngIf="vmFormGroup.get('vmCpu')?.hasError('required')">
+          填写CPU个数
+        </ng-container>
+        <ng-container *ngIf="
+        vmFormGroup.get('vmCpu')?.hasError('max') ||
+        vmFormGroup.get('vmCpu')?.hasError('min')">
+          Cpu个数范围[1..16]
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">内存大小(MB)</nz-form-label>
+    <nz-form-control [nzSpan]="12" nzHasFeedback>
+      <nz-input-number formControlName="vmMemory"></nz-input-number>
+      <nz-form-explain
+        *ngIf="
+        (vmFormGroup.get('vmMemory')?.dirty && vmFormGroup.get('vmMemory')?.errors)||
+        vmFormGroup.get('vmMemory')?.pending">
+        <ng-container *ngIf="vmFormGroup.get('vmMemory')?.hasError('required')">
+          填写内存大小
+        </ng-container>
+        <ng-container *ngIf="vmFormGroup.get('vmMemory')?.hasError('min')">
+          内存最小1024MB
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">存储大小(GB)</nz-form-label>
+    <nz-form-control [nzSpan]="12" nzHasFeedback>
+      <nz-input-number formControlName="vmStorage"></nz-input-number>
+      <nz-form-explain
+        *ngIf="
+        (vmFormGroup.get('vmStorage')?.dirty && vmFormGroup.get('vmStorage')?.errors)||
+        vmFormGroup.get('vmStorage')?.pending">
+        <ng-container *ngIf="vmFormGroup.get('vmStorage')?.hasError('required')">
+          填写存储大小
+        </ng-container>
+        <ng-container *ngIf="vmFormGroup.get('vmStorage')?.hasError('min')">
+          存储最小1GB
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+</form>

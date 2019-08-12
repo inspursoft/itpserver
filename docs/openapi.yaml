@@ -1,0 +1,363 @@
+openapi: 3.0.0
+info:
+  title: ITP API Server
+  description: API server document for the Inspur Testing Platform.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8088/v1
+    description: ITP API Server service.
+paths:
+  /vms:
+    get:
+      summary: Returns a list of virtual machines or filtered by name.
+      description: Get all or filter by name of virutal machines which provides by 
+        ITP service.
+      parameters: 
+        - name: vm_name
+          in: query
+          description: The virual machine name to return. 
+          schema:
+            type: string
+      responses:
+        '200':    # status code
+          description: Successful get all or filter virtual machine by name.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VirtualMachine"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      summary: Submit to create a virtual machine.
+      description: Submit to create virtual machine by ITP service.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VirtualMachine"
+      responses:
+        '200':
+          description: Successful submitted information to create a virtual machine.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /vm/{vm_id}:
+    delete:
+      summary: Delete a virtual machine by ID.
+      description: Delete a virtual machine by ID with ITP service.
+      parameters:
+        - name: vm_id
+          in: path
+          description: The virtual machine ID to be deleted.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful deleted virtual machine by ID.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /packages:
+    get:
+      summary: Return a list of software packages.
+      description: Get all or filter by name of software packages which provides by 
+        ITP service.
+      parameters:
+        - name: name
+          in: query
+          description: The software package name to return
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful get all or filter software packages by name.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SoftwarePackage"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      summary: Submit information about a software package.
+      description: Submit information about a software package to ITP service.
+      requestBody:
+        required: true
+        content:
+          'application/x-www-form-urlencoded':
+            schema:
+              properties:
+                package_name:
+                  description: The software package name to be submitted.
+                  type: string
+                package_tag:
+                  description: The software package tag to be submitted.
+                  type: string
+      responses:
+        '200':
+          description: Successful submitted information about software package.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      summary: Delete software package by name and tag.
+      description: Delete software package from ITP service.
+      parameters:
+        - name: package_name
+          in: query
+          description: The software package name to be deleted.
+          schema:
+            type: string
+        - name: package_tag
+          in: query
+          description: The software package tag to be deleted.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful submitted information about software package.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /installations:
+    get:
+      summary: Get virtual machines with software packages installed.
+      description: Get virtual machines with software packages installed
+        by ITP service.
+      parameters: 
+        - name: vm_name
+          description: The virtual machine name which installed software packages.
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful get virtual machines with software package installed.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Installation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /install/{vm_id}:
+    post:
+      summary: Install selected software packages onto a virtual machine.
+      description: Install selected software packages onto a virtual machine.
+      parameters: 
+        - name: vm_id
+          description: The virtual machine ID which wants to install software packages.
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                packages:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Successful installed software package onto a virtual machine.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Installation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      summary: Delete selected virtual machine which with software package installed.
+      description: Delete selected virtual machine with with software package installed
+        by ITP service.
+      parameters:
+        - name: vm_id
+          in: path
+          description: The virtual machine ID which installed software to be deleted.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful deleted virtual machine which with software package installed.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  schemas:
+    VirtualMachine:
+      properties:
+        vm_id:
+          type: string
+        vm_name:
+          type: string
+        vm_os:
+          type: string
+        vm_spec:
+          $ref: '#/components/schemas/VirtualMachineSpec'
+        creation_time:
+          type: string
+          format: datetime
+      required: 
+        - vm_id
+        - vm_name
+        - vm_os
+    VirtualMachineSpec:
+      properties:
+        cpus:
+          type: integer
+        memory:
+          type: string
+        storage:
+          type: string
+        extras:
+          type: string
+    SoftwarePackage:
+      properties:
+        package_id: 
+          type: integer
+          format: int32
+        package_name: 
+          type: string
+        package_tag:
+          type: string
+        creation_time:
+          type: string
+          format: datetime
+      required:
+        - package_id
+        - package_name
+        - package_tag
+    Installation:
+      properties:
+        vm_id: 
+          type: string
+        creation_time:
+          type: string
+          format: datetime
+        packages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SoftwarePackage'
+      required:
+        - vm_id
+        - packages
+    Error:
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      required: 
+        - code
+        - message
+  responses:
+    BadRequest:
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: The resouce specified was forbidden to access.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The resource specified was not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalError:
+      description: Internal error occurred at server side.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

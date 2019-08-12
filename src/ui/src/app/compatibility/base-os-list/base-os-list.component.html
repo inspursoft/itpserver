@@ -1,0 +1,21 @@
+<div nz-row nzType="flex">
+  <nz-card *ngFor="let os of baseOsList"
+           [nzCover]="os.name === 'CentOs' ?centLogoTemplate : ubuntuLogoTemplate"
+           style="width:300px">
+    <nz-card-meta
+      [nzTitle]="os.name"
+      [nzDescription]="os.version">
+    </nz-card-meta>
+    <div nz-row nzType="flex" [nzJustify]="'end'" [nzAlign]="'middle'">
+      <nz-divider nzType="vertical"></nz-divider>
+      <i nz-icon nzType="delete" nzTheme="outline"></i>
+      <a (click)="deleteBaseOs(os)">Delete</a>
+    </div>
+  </nz-card>
+</div>
+<ng-template #ubuntuLogoTemplate>
+  <img alt="" src="../../../assets/images/ubuntu.png">
+</ng-template>
+<ng-template #centLogoTemplate>
+  <img alt="" src="../../../assets/images/centOs.png">
+</ng-template>

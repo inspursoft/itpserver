@@ -1,0 +1,42 @@
+version: "3.7"
+services:
+  postgredb:
+    build:
+      context: ../
+      dockerfile: ./containers/db/Dockerfile
+    restart: always
+    env_file:
+      - ../conf/db/db.env
+    volumes:
+      - /data/itp-db:/var/lib/postgresql/data
+    networks:
+      - itp
+  apiserver:
+    build:
+      context: ../
+      dockerfile: ./containers/apiserver/Dockerfile
+    restart: always
+    depends_on:
+      - postgredb     
+    volumes:
+      - ../conf/apiserver/app.conf:/go/bin/conf/app.conf
+      - ../docs/swagger.yml:/go/bin/swagger/swagger.yml
+    networks:
+      - itp
+  proxy:
+    image: nginx:1.12.1-alpine
+    depends_on: 
+      - apiserver
+    restart: always
+    ports:
+      - "8089:80"
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:z
+      - ../src/ui/dist:/usr/share/nginx/html:z
+    networks:
+      - itp
+configs:
+  init-db:
+    file: ./containers/db/init-db.sh
+networks:
+  itp:
