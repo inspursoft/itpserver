@@ -68,6 +68,9 @@ func (s *SecureShell) ExecuteCommand(cmd string) error {
 	}
 	defer session.Close()
 	stdout, _ := session.StdoutPipe()
+	if err != nil {
+		return err
+	}
 	log.Printf("Execute command: %s\n", cmd)
 	err = session.Start(cmd)
 	if err != nil {

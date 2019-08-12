@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"path"
 	"path/filepath"
 
 	"github.com/inspursoft/itpserver/src/apiserver/services"
@@ -25,10 +26,13 @@ type vagrantCli struct {
 	err        *models.ITPError
 }
 
+var vagrantCommand = `PATH=/usr/local/bin:$PATH vagrant`
+
 func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *vagrantCli {
-	sourcePath := beego.AppConfig.String("vagrant::sourcepath")
-	baseWorkPath := beego.AppConfig.String("vagrant::baseworkpath")
-	outputPath := beego.AppConfig.String("vagrant::outputpath")
+	pathPrefix := beego.AppConfig.String("pathprefix")
+	sourcePath := path.Join(pathPrefix, beego.AppConfig.String("vagrant::sourcepath"))
+	baseWorkPath := path.Join(pathPrefix, beego.AppConfig.String("vagrant::baseworkpath"))
+	outputPath := path.Join(pathPrefix, beego.AppConfig.String("vagrant::outputpath"))
 	vc := &vagrantCli{sourcePath: sourcePath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
 		outputPath: outputPath, vmWithSpec: vmWithSpec, output: output, err: &models.ITPError{}}
 	var err error
@@ -50,6 +54,10 @@ func (vc *vagrantCli) init() *vagrantCli {
 	if exists {
 		vc.err.Conflict(fmt.Sprintf("VM name: %s or IP: %s", vmName, vmIP), fmt.Errorf("VM already exists with IP: %s or Name: %s", vmIP, vmName))
 		return vc
+	}
+	err = vc.sshClient.CheckDir(vc.sourcePath)
+	if err != nil {
+		vc.err.InternalError(err)
 	}
 	err = vc.sshClient.CheckDir(vc.workPath)
 	if err != nil {
@@ -151,7 +159,7 @@ func (vc *vagrantCli) Create() error {
 	vc.init().
 		copySources().
 		generateConfig().
-		executeCommand(fmt.Sprintf("cd %s && vagrant up && sh ssh.sh %s", vc.workPath, vc.vmWithSpec.IP)).
+		executeCommand(fmt.Sprintf("cd %s && %s up", vc.workPath, vagrantCommand)).
 		updateVID().
 		record()
 	if !vc.err.HasNoError() && vc.err != nil {
@@ -162,7 +170,7 @@ func (vc *vagrantCli) Create() error {
 }
 
 func (vc *vagrantCli) Halt() error {
-	vc.executeCommand(fmt.Sprintf("cd %s && vagrant halt", vc.workPath))
+	vc.executeCommand(fmt.Sprintf("cd %s", vc.workPath)).executeCommand(fmt.Sprintf("%s halt", vagrantCommand))
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to halt VM with error: %+v", vc.err))
 		return vc.err
@@ -171,7 +179,7 @@ func (vc *vagrantCli) Halt() error {
 }
 
 func (vc *vagrantCli) Destroy() error {
-	vc.loadSpec().executeCommand(fmt.Sprintf("vagrant destroy -f %s", vc.vmWithSpec.Spec.VID)).remove()
+	vc.loadSpec().executeCommand(fmt.Sprintf("%s destroy -f %s", vagrantCommand, vc.vmWithSpec.Spec.VID)).remove()
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to destroy VM with error: %+v", vc.err))
 		return vc.err
@@ -180,7 +188,7 @@ func (vc *vagrantCli) Destroy() error {
 }
 
 func (vc *vagrantCli) GlobalStatus() error {
-	vc.executeCommand("vagrant global-status")
+	vc.executeCommand(fmt.Sprintf("%s global-status", vagrantCommand))
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to get global status of VM with error: %+v", vc.err))
 		return vc.err
@@ -189,7 +197,7 @@ func (vc *vagrantCli) GlobalStatus() error {
 }
 
 func (vc *vagrantCli) Package() error {
-	vc.loadSpec().updateVID().executeCommand(fmt.Sprintf("vagrant package %s --output %s", vc.vmWithSpec.Spec.VID, filepath.Join(vc.outputPath, fmt.Sprintf("%s.box", vc.vmWithSpec.Name))))
+	vc.loadSpec().updateVID().executeCommand(fmt.Sprintf("%s package %s --output %s", vagrantCommand, vc.vmWithSpec.Spec.VID, filepath.Join(vc.outputPath, fmt.Sprintf("%s.box", vc.vmWithSpec.Name))))
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to package VM with error: %+v", vc.err))
 		return vc.err
