@@ -1,0 +1,7 @@
+[{{.Target.Name}}]
+{{range $e := .Target.IPs}}{{$e}}
+{{end}}
+
+[{{.Local.Name}}]
+{{range $e := .Local.IPs}}{{$e}}
+{{end}}

@@ -1,0 +1,6 @@
+---
+- hosts: all
+  roles:
+- hosts: install
+  roles:
+    - {role: {{.PkgName}}}

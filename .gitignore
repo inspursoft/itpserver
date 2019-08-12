@@ -1,0 +1,6 @@
+.DS_Store
+itpserver
+*.tmp
+src/apiserver/apiserver
+src/apiserver/swagger
+src/apiserver/conf/app-local.conf

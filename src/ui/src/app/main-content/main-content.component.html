@@ -1,0 +1,65 @@
+<nz-layout class="layout">
+  <nz-header>
+    <div class="logo-container">
+      <img alt="" src="../../assets/images/logo.png">
+    </div>
+    <ul nz-menu [nzTheme]="'dark'" [nzMode]="'horizontal'" class="main-menu">
+      <li nz-menu-item [nzSelected]="true">兼容性测试</li>
+      <nz-dropdown [nzPlacement]="'bottomRight'">
+        <div nz-dropdown class="login-container">
+          <a>{{userDetails?.username}}</a>
+          <i nz-icon type="down"></i>
+        </div>
+        <ul nz-menu>
+          <li nz-menu-item nzDisabled style="min-width: 164px;">
+            账户设置
+          </li>
+          <li nz-menu-divider></li>
+          <li nz-menu-item (click)="doLogout()">退出登录</li>
+        </ul>
+      </nz-dropdown>
+    </ul>
+  </nz-header>
+  <nz-layout>
+    <nz-sider>
+      <ul nz-menu [nzMode]="'inline'" nzTheme="dark">
+        <li nz-menu-item nz-tooltip nzPlacement="right" [routerLink]="'/compatibility/installation'"
+            [nzSelected]="true">
+          <span title>
+            <i nz-icon type="bars" nzTheme="outline"></i>
+            <span>工具集安装</span>
+          </span>
+        </li>
+        <li nz-menu-item nz-tooltip nzPlacement="right" [routerLink]="'/compatibility/vm'">
+          <span title>
+            <i nz-icon type="bars" nzTheme="outline"></i>
+            <span>测试环境列表</span>
+          </span>
+        </li>
+        <li nz-submenu>
+           <span title>
+            <i nz-icon type="bars" nzTheme="outline"></i>
+            <span>基础配置</span>
+          </span>
+          <ul>
+            <li nz-menu-item nz-tooltip nzPlacement="right" [routerLink]="'/compatibility/package'">
+              <span title>
+                <i nz-icon type="bars" nzTheme="outline"></i>
+                <span>工具集列表</span>
+              </span>
+            </li>
+            <li nz-menu-item nz-tooltip nzPlacement="right" [routerLink]="'/compatibility/base-os'">
+              <span title>
+                <i nz-icon type="bars" nzTheme="outline"></i>
+                <span>基础镜像</span>
+              </span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </nz-sider>
+    <nz-layout style="padding:0 24px 24px; background-color: white">
+      <router-outlet></router-outlet>
+    </nz-layout>
+  </nz-layout>
+</nz-layout>

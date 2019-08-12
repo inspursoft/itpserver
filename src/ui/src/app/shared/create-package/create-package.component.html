@@ -1,0 +1,77 @@
+<form nz-form [formGroup]="packageFromGroup">
+  <!--<nz-form-item>-->
+    <!--<nz-form-label nzRequired [nzSpan]="7">工具集名称</nz-form-label>-->
+    <!--<nz-form-control [nzSpan]="17" nzHasFeedback>-->
+      <!--<input  nz-input formControlName="name" placeholder="工具集名称"/>-->
+      <!--<nz-form-explain-->
+        <!--*ngIf="-->
+        <!--(packageFromGroup.get('name')?.dirty && packageFromGroup.get('name')?.errors)||-->
+        <!--packageFromGroup.get('name')?.pending">-->
+        <!--<ng-container *ngIf="packageFromGroup.get('name')?.hasError('required')">-->
+          <!--请输入工具集名称-->
+        <!--</ng-container>-->
+        <!--<ng-container *ngIf="packageFromGroup.get('name')?.hasError('duplicated')">-->
+          <!--工具集名称已存在-->
+        <!--</ng-container>-->
+        <!--<ng-container *ngIf="packageFromGroup.get('name')?.pending">-->
+          <!--验证中...-->
+        <!--</ng-container>-->
+      <!--</nz-form-explain>-->
+    <!--</nz-form-control>-->
+  <!--</nz-form-item>-->
+
+  <!--<nz-form-item>-->
+    <!--<nz-form-label nzRequired [nzSpan]="7">工具集版本</nz-form-label>-->
+    <!--<nz-form-control [nzSpan]="17" nzHasFeedback>-->
+      <!--<input nz-input formControlName="tag" placeholder="输入工具集版本"/>-->
+      <!--<nz-form-explain-->
+        <!--*ngIf="-->
+        <!--(packageFromGroup.get('tag')?.dirty && packageFromGroup.get('tag')?.errors)||-->
+        <!--packageFromGroup.get('tag')?.pending">-->
+        <!--<ng-container *ngIf="packageFromGroup.get('tag')?.hasError('required')">-->
+          <!--请输入工具集版本-->
+        <!--</ng-container>-->
+        <!--<ng-container *ngIf="packageFromGroup.get('tag')?.hasError('duplicated')">-->
+          <!--工具集版本已存在-->
+        <!--</ng-container>-->
+        <!--<ng-container *ngIf="packageFromGroup.get('tag')?.pending">-->
+          <!--验证中...-->
+        <!--</ng-container>-->
+      <!--</nz-form-explain>-->
+    <!--</nz-form-control>-->
+  <!--</nz-form-item>-->
+
+  <nz-form-item>
+    <nz-form-label nzRequired [nzSpan]="7">选择测试环境</nz-form-label>
+    <nz-form-control [nzSpan]="17" nzHasFeedback>
+      <nz-select nzPlaceHolder="选择测试环境" formControlName="vmName">
+        <nz-option *ngFor="let vm of vmList" [nzLabel]="vm.name" [nzValue]="vm.name" ></nz-option>
+      </nz-select>
+      <nz-form-explain
+        *ngIf="(
+        packageFromGroup.get('vmName')?.dirty && packageFromGroup.get('vmName')?.errors)||
+        packageFromGroup.get('vmName')?.pending">
+        <ng-container *ngIf="packageFromGroup.get('vmName')?.hasError('required')">
+          请选择测试环境基础镜像
+        </ng-container>
+      </nz-form-explain>
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-upload nzType="drag"
+             [(nzFileList)]="fileList"
+             [nzLimit]="1"
+             [nzShowUploadList]="true"
+             [nzMultiple]="false"
+             [nzFilter]="uploadFilter"
+             [nzDisabled]="createPackageWip"
+             [nzBeforeUpload]="beforeUpload">
+    <p class="ant-upload-drag-icon">
+      <i nz-icon nzType="inbox"></i>
+    </p>
+    <p class="ant-upload-text">单击或拖拽文件至指定区域上传</p>
+    <p class="ant-upload-hint">
+      仅支持zip文件
+    </p>
+  </nz-upload>
+</form>
