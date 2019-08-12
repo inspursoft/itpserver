@@ -157,7 +157,7 @@ func (vc *vagrantCli) remove() *vagrantCli {
 
 func (vc *vagrantCli) Create() error {
 	vc.init().
-		copySources().
+		// copySources().
 		generateConfig().
 		executeCommand(fmt.Sprintf("cd %s && %s up", vc.workPath, vagrantCommand)).
 		updateVID().

@@ -32,8 +32,8 @@ var ansibleCommand = "PATH=/usr/local/bin:$PATH ansible-playbook"
 
 func NewClient(vmWithSpec models.VMWithSpec, pkg models.PackageVO, output io.Writer) *ansibleCli {
 	hostIP := beego.AppConfig.String("ansible::hostip")
+	uploadPath := beego.AppConfig.String("ansible::uploadpath")
 	pathPrefix := beego.AppConfig.String("pathprefix")
-	uploadPath := path.Join(pathPrefix, beego.AppConfig.String("ansible::uploadpath"))
 	sourcePath := path.Join(pathPrefix, beego.AppConfig.String("ansible::sourcepath"))
 	baseWorkPath := path.Join(pathPrefix, beego.AppConfig.String("ansible::baseworkpath"))
 	ac := &ansibleCli{hostIP: hostIP,
@@ -193,7 +193,7 @@ func (ac *ansibleCli) Transfer() error {
 func (ac *ansibleCli) Install() error {
 	targetPath := filepath.Join(ac.workPath, ac.pkg.Name)
 	ac.init().
-		executeCommand(fmt.Sprintf("cd %s && %s -i hosts install.yml", ansibleCommand, targetPath)).
+		executeCommand(fmt.Sprintf("cd %s && %s -i hosts install.yml", targetPath, ansibleCommand)).
 		recordInstall()
 	if !ac.err.HasNoError() && ac.err != nil {
 		beego.Error(fmt.Sprintf("Failed to execute Ansible client: %+v", ac.err))
