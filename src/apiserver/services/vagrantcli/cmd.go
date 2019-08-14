@@ -157,9 +157,9 @@ func (vc *vagrantCli) remove() *vagrantCli {
 
 func (vc *vagrantCli) Create() error {
 	vc.init().
-		// copySources().
+		copySources().
 		generateConfig().
-		executeCommand(fmt.Sprintf("cd %s && %s up", vc.workPath, vagrantCommand)).
+		executeCommand(fmt.Sprintf("cd %s && %s up && PATH=/bin:$PATH sh ssh.sh %s", vc.workPath, vagrantCommand, vc.vmWithSpec.IP)).
 		updateVID().
 		record()
 	if !vc.err.HasNoError() && vc.err != nil {

@@ -77,7 +77,7 @@ func (ac *ansibleCli) transferPackage() *ansibleCli {
 		ac.err.Notfound("VM", fmt.Errorf("VM name is required"))
 		return ac
 	}
-	uploadSourcePath := filepath.Join(ac.uploadPath, vmName)
+	uploadSourcePath := filepath.Join(ac.uploadPath)
 	err := ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
 	if err != nil {
 		ac.err.InternalError(err)
@@ -89,6 +89,7 @@ func (ac *ansibleCli) unzipPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
+	ac.pkg.SourceName = ac.pkg.Name + ac.pkg.Tag + ".zip"
 	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && unzip %s", ac.workPath, ac.pkg.SourceName))
 	if err != nil {
 		ac.err.InternalError(err)

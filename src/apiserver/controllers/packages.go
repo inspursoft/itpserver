@@ -1,15 +1,13 @@
 package controllers
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"net/http"
 
-	"github.com/inspursoft/itpserver/src/apiserver/services/ansiblecli"
+	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/utils"
 
-	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
 
@@ -48,7 +46,6 @@ func (pc *PackagesController) Get() {
 // @Title Post
 // @Description Upload software package.
 // @Param Authorization	header	string	true	"Set authorization info."
-// @Param vm_name	formData	string	true	"The VM name to install package."
 // @Param	pkg	formData	file	true		"The package to be uploaded."
 // @Success 200 {string} 		Successful submitted information about software package.
 // @Failure 400 Bad request.
@@ -58,14 +55,6 @@ func (pc *PackagesController) Get() {
 // @Failure 500 Internal error occurred at server side.
 // @router / [post]
 func (pc *PackagesController) Upload() {
-	vmName := pc.requiredParam("vm_name")
-	exists, err := services.NewVMHandler().Exists(models.VM{Name: vmName})
-	if err != nil {
-		pc.handleError(err)
-	}
-	if !exists {
-		pc.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM: %s not found.", vmName))
-	}
 	_, fh, err := pc.GetFile("pkg")
 	if err != nil {
 		pc.handleError(err)
@@ -74,7 +63,7 @@ func (pc *PackagesController) Upload() {
 	if !utils.CheckFileExt(sourceName, ".zip") {
 		pc.CustomAbort(http.StatusBadRequest, "Only allow file with zip extsion.")
 	}
-	targetPath, err := utils.CheckDirs("upload", vmName)
+	targetPath, err := utils.CheckDirs("upload")
 	if err != nil {
 		pc.handleError(err)
 	}
@@ -82,12 +71,9 @@ func (pc *PackagesController) Upload() {
 	if err != nil {
 		pc.handleError(err)
 	}
-	vmWithSpec := models.VMWithSpec{Name: vmName}
 	pkg := models.PackageVO{Name: utils.FileNameWithoutExt(sourceName), SourceName: sourceName}
-	err = ansiblecli.NewClient(vmWithSpec, pkg, pc.Ctx.ResponseWriter).Transfer()
-	if err != nil {
-		pc.handleError(err)
-	}
+	handler := services.NewPackageHandler()
+	handler.Create(pkg)
 }
 
 // @Title Delete
