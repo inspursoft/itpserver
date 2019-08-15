@@ -54,11 +54,11 @@ func (ic *installationConf) Install(ID int64, pkgName, pkgTag string) error {
 	if err != nil {
 		return ic.e
 	}
-	exists := ic.daoHandler.CheckPackagesInstalledToVM(vm, pkg)
-	if exists {
-		ic.e.Conflict(fmt.Sprintf("name: %s with tag: %s on VM ID: %d", pkgName, pkgTag, ID), err)
-		return ic.e
-	}
+	// exists := ic.daoHandler.CheckPackagesInstalledToVM(vm, pkg)
+	// if exists {
+	// 	ic.e.Conflict(fmt.Sprintf("name: %s with tag: %s on VM ID: %d", pkgName, pkgTag, ID), err)
+	// 	return ic.e
+	// }
 	_, err = ic.daoHandler.InstallPackageToVM(vm, pkg)
 	if err != nil {
 		ic.e.InternalError(err)

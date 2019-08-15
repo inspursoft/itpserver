@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/inspursoft/itpserver/src/apiserver/dao"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
@@ -46,8 +44,9 @@ func (pc *packageConf) Create(pkg models.PackageVO) error {
 		return pc.e
 	}
 	if query != nil {
-		pc.e.Conflict("Package", fmt.Errorf("name: %s with tag: %s", pkg.Name, pkg.Tag))
-		return pc.e
+		// pc.e.Conflict("Package", fmt.Errorf("name: %s with tag: %s", pkg.Name, pkg.Tag))
+		// return pc.e
+		return nil
 	}
 	_, err = pc.daoHandler.AddPackage(&models.Package{Name: pkg.Name, Tag: pkg.Tag})
 	if err != nil {
