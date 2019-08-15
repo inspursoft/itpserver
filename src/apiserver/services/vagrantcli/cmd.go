@@ -29,8 +29,8 @@ type vagrantCli struct {
 var vagrantCommand = `PATH=/usr/local/bin:$PATH vagrant`
 
 func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *vagrantCli {
-	sourcePath := beego.AppConfig.String("vagrant::sourcepath")
 	pathPrefix := beego.AppConfig.String("pathprefix")
+	sourcePath := path.Join(pathPrefix, beego.AppConfig.String("vagrant::sourcepath"))
 	baseWorkPath := path.Join(pathPrefix, beego.AppConfig.String("vagrant::baseworkpath"))
 	outputPath := path.Join(pathPrefix, beego.AppConfig.String("vagrant::outputpath"))
 	vc := &vagrantCli{sourcePath: sourcePath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
