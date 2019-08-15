@@ -1,4 +1,4 @@
-FROM 10.111.25.119/library/golang:1.12.4-alpine3.9
+FROM golang:1.12.4-alpine3.9
 
 RUN mkdir -p /go/src/github.com/inspursoft/itpserver/src \
  && echo http://dl-2.alpinelinux.org/alpine/edge/community/ >> /etc/apk/repositories \
