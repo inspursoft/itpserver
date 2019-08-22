@@ -126,7 +126,8 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
 	}
-	f, err := os.OpenFile(filepath.Join(vc.workPath, "Vagrantfile"), os.O_RDONLY, 0640)
+
+	f, err := os.Open(filepath.Join(vc.uploadPath, vc.vmWithSpec.Name, "Vagrantfile"))
 	if err != nil {
 		vc.err.InternalError(err)
 		return vc
