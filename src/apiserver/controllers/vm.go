@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 	"github.com/inspursoft/itpserver/src/apiserver/services/vagrantcli"
@@ -39,6 +42,8 @@ func (v *VMController) Get() {
 // @Title Post
 // @Description Submit to create a virtual machine.
 // @Param Authorization	header	string	true	"Set authorization info."
+// @Param	build_type	query	string	false	"Specify the build type."
+// @Param vm_name	query	string	false	"Specify the VM name."
 // @Param	vm_with_spec	body 	models.VMWithSpec	false		"The virual machine to submit."
 // @Success 200 {string} 	Successful submitted virtual machine.
 // @Failure 400 Bad request.
@@ -48,9 +53,20 @@ func (v *VMController) Get() {
 // @Failure 500 Internal error occurred at server side.
 // @router / [post]
 func (v *VMController) Post() {
+	buildType := v.GetString("build_type", "spec")
+	vmName := v.GetString("vm_name", "")
+	var err error
+	if buildType == "vagrantfile" {
+		if len(strings.TrimSpace(vmName)) == 0 {
+			v.CustomAbort(http.StatusBadRequest, "VM name is required.")
+		}
+		err = vagrantcli.NewEaseClient(vmName, v.Ctx.ResponseWriter).CreateByVagrantfile()
+		v.handleError(err)
+		return
+	}
 	var vmWithSpec models.VMWithSpec
 	v.loadRequestBody(&vmWithSpec)
-	err := vagrantcli.NewClient(vmWithSpec, v.Ctx.ResponseWriter).Create()
+	err = vagrantcli.NewClient(vmWithSpec, v.Ctx.ResponseWriter).Create()
 	v.handleError(err)
 }
 

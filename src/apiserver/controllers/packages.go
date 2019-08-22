@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"path/filepath"
-
 	"net/http"
+	"path/filepath"
+	"strings"
 
+	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/utils"
 
@@ -47,6 +48,8 @@ func (pc *PackagesController) Get() {
 // @Description Upload software package.
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	pkg	formData	file	true		"The package to be uploaded."
+// @Param source_type	query	string	false	"The source of uploaded type."
+// @Param	vm_name	query	string	false	"The target VM to upload packages."
 // @Success 200 {string} 		Successful submitted information about software package.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
@@ -59,11 +62,25 @@ func (pc *PackagesController) Upload() {
 	if err != nil {
 		pc.handleError(err)
 	}
-	sourceName := fh.Filename
-	if !utils.CheckFileExt(sourceName, ".zip") {
-		pc.CustomAbort(http.StatusBadRequest, "Only allow file with zip extsion.")
+	sourceType := pc.GetString("source_type", "package")
+	vmName := pc.GetString("vm_name", "")
+	var uploadPath string
+	if sourceType == "vagrantfile" {
+		if len(strings.TrimSpace(vmName)) == 0 {
+			pc.CustomAbort(http.StatusBadRequest, "VM name is required.")
+		}
+		uploadPath = beego.AppConfig.String("vagrant::uploadpath")
 	}
-	targetPath, err := utils.CheckDirs("upload")
+
+	sourceName := fh.Filename
+	if sourceType == "package" {
+		if !utils.CheckFileExt(sourceName, ".zip") {
+			pc.CustomAbort(http.StatusBadRequest, "Only allows file with zip extension.")
+		}
+		uploadPath = beego.AppConfig.String("ansible::uploadpath")
+	}
+
+	targetPath, err := utils.CheckDirs(filepath.Join(uploadPath, vmName))
 	if err != nil {
 		pc.handleError(err)
 	}
