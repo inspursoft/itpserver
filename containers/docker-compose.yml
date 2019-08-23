@@ -17,10 +17,12 @@ services:
       dockerfile: ./containers/apiserver/Dockerfile
     restart: always
     depends_on:
-      - postgredb     
+      - postgredb
+    ports:
+      - "8088:8088"     
     volumes:
-      - ../conf/apiserver/app.conf:/go/bin/conf/app.conf
-      - ../docs/swagger.yml:/go/bin/swagger/swagger.yml
+      - ../upload:/go/src/github.com/inspursoft/itpserver/src/apiserver/upload
+      - ../upload-package:/go/src/github.com/inspursoft/itpserver/src/apiserver/upload-package
     networks:
       - itp
   proxy:
