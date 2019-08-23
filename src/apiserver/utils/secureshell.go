@@ -67,16 +67,16 @@ func (s *SecureShell) ExecuteCommand(cmd string) error {
 		return err
 	}
 	defer session.Close()
-	stdout, _ := session.StdoutPipe()
+	stdout, err := session.StdoutPipe()
 	if err != nil {
 		return err
 	}
+	go io.Copy(s.output, stdout)
 	log.Printf("Execute command: %s\n", cmd)
 	err = session.Start(cmd)
 	if err != nil {
 		return err
 	}
-	go io.Copy(s.output, stdout)
 	return session.Wait()
 }
 
@@ -116,4 +116,8 @@ func (s *SecureShell) SecureCopy(filePath string, destinationPath string) error 
 
 func (s *SecureShell) CheckDir(dir string) error {
 	return s.ExecuteCommand(fmt.Sprintf("mkdir -p %s", dir))
+}
+
+func (s *SecureShell) RemoveDir(dir string) error {
+	return s.ExecuteCommand(fmt.Sprintf("rm -rf %s", dir))
 }
