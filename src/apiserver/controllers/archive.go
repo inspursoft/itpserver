@@ -18,7 +18,7 @@ type ArchiveController struct {
 // @Param	vm_name	query	string	true	"VM name."
 // @Param	repo_name	query	string	true	"Repository name."
 // @Param	principle	query	string	true	"Principle name."
-// @Success 200 {string} 	Successful uploaded packaged VM box to remote Nexus service.
+// @Success 200 Successful uploaded packaged VM box to remote Nexus service.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
@@ -50,7 +50,7 @@ func (ac *ArchiveController) Upload() {
 // @Description List packaged VM box from ITP service.
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	vm_name	query 	string	true		"VM name."
-// @Success 200 {string} 	Successful download packaged VM box from ITP service.
+// @Success 200 Successful download packaged VM box from ITP service.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
@@ -72,7 +72,7 @@ func (ac *ArchiveController) List() {
 // @Description Download packaged VM box from ITP service.
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	vm_name	query 	string	true		"VM name."
-// @Success 200 {string} 	Successful download packaged VM box from ITP service.
+// @Success 200 Successful download packaged VM box from ITP service.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.

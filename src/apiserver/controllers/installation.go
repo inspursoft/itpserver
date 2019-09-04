@@ -17,7 +17,7 @@ type InstallationController struct {
 // @Description Get virtual machines with software packages installed.
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	vm_name		query 	string	true		"The virtual machine ID which installed software packages."
-// @Success 200 {string} 	Successful get virtual machines with software package installed.
+// @Success 200 Successful get virtual machines with software package installed.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
@@ -42,7 +42,7 @@ func (ic *InstallationController) Get() {
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	vm_name		path 	string	true		"The virtual machine name which wants to install software packages."
 // @Param	pkg		body 	models.PackageVO	true		"The virtual machine ID which wants to install software packages."
-// @Success 200 {string} 	Successful installed software package onto a virtual machine.
+// @Success 200 Successful installed software package onto a virtual machine.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
@@ -78,7 +78,7 @@ func (ic *InstallationController) Post() {
 // @Param	vm_name	path 	string	true		"The virtual machine ID to be deleted."
 // @Param pkg_name	query	string	true	"The package name to be deleted on VM."
 // @Param pkg_tag	query	string	false	"The package tag to be deleted on VM."
-// @Success 200 {string} 	Successful deleted virtual machine by ID.
+// @Success 200 Successful deleted virtual machine by ID.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.

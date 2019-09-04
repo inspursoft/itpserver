@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 	"path/filepath"
-	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
@@ -21,7 +20,7 @@ type PackagesController struct {
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	name	query 	string	false		"The software package name to return"
 // @Param tag	query string false "The software package tag to return"
-// @Success 200 {string} 		Successful get all or filter software packages by name.
+// @Success 200 Successful get all or filter software packages by name.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
@@ -44,13 +43,13 @@ func (pc *PackagesController) Get() {
 	pc.serveJSON(resp)
 }
 
-// @Title Post
+// @Title Upload package.
 // @Description Upload software package.
 // @Param Authorization	header	string	true	"Set authorization info."
+// @Param source_type	query	string	false	"Source type for upload"
 // @Param	pkg	formData	file	true		"The package to be uploaded."
-// @Param source_type	query	string	false	"The source of uploaded type."
 // @Param	vm_name	query	string	false	"The target VM to upload packages."
-// @Success 200 {string} 		Successful submitted information about software package.
+// @Success 200 Successful submitted information about software package.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
@@ -62,24 +61,19 @@ func (pc *PackagesController) Upload() {
 	if err != nil {
 		pc.handleError(err)
 	}
-	sourceType := pc.GetString("source_type", "package")
+	sourceName := fh.Filename
 	vmName := pc.GetString("vm_name", "")
+	sourceType := pc.GetString("source_type", "ansible")
 	var uploadPath string
 	if sourceType == "vagrantfile" {
-		if len(strings.TrimSpace(vmName)) == 0 {
-			pc.CustomAbort(http.StatusBadRequest, "VM name is required.")
-		}
+		vmName = pc.requiredParam("vm_name")
 		uploadPath = beego.AppConfig.String("vagrant::uploadpath")
-	}
-
-	sourceName := fh.Filename
-	if sourceType == "package" {
+	} else {
 		if !utils.CheckFileExt(sourceName, ".zip") {
 			pc.CustomAbort(http.StatusBadRequest, "Only allows file with zip extension.")
 		}
 		uploadPath = beego.AppConfig.String("ansible::uploadpath")
 	}
-
 	targetPath, err := utils.CheckDirs(filepath.Join(uploadPath, vmName))
 	if err != nil {
 		pc.handleError(err)
@@ -98,7 +92,7 @@ func (pc *PackagesController) Upload() {
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	package_name	query 	string	true		"The software package name to be deleted."
 // @Param	package_tag		query 	string	false		"The software package tag to be deleted."
-// @Success 200 {string} 		Successful submitted information about software package.
+// @Success 200 Successful submitted information about software package.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.

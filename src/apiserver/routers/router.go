@@ -43,7 +43,7 @@ func init() {
 				&controllers.OneStepController{},
 			),
 		),
-		beego.NSNamespace("/archive",
+		beego.NSNamespace("/archives",
 			beego.NSInclude(
 				&controllers.ArchiveController{},
 			),

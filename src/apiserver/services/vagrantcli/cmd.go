@@ -126,7 +126,6 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
 	}
-
 	f, err := os.Open(filepath.Join(vc.uploadPath, vc.vmWithSpec.Name, "Vagrantfile"))
 	if err != nil {
 		vc.err.InternalError(err)
@@ -160,6 +159,15 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	if vc.vmWithSpec.IP == "" || vc.vmWithSpec.OS == "" ||
 		vc.vmWithSpec.Spec.CPUs == 0 || vc.vmWithSpec.Spec.Memory == "" {
 		vc.err.Notfound("Vagrantfile missing required values.", errors.New("Vagrantfile missing required values"))
+		return vc
+	}
+	exists, err := services.NewVMHandler().Exists(models.VM{IP: vc.vmWithSpec.IP, Name: vc.vmWithSpec.Name})
+	if err != nil {
+		vc.err.InternalError(err)
+		return vc
+	}
+	if exists {
+		vc.err.Conflict(fmt.Sprintf("VM: %s already exist.", vc.vmWithSpec.Name), fmt.Errorf("VM %s already exist", vc.vmWithSpec.Name))
 	}
 	return vc
 }
@@ -264,6 +272,7 @@ func (vc *vagrantCli) CreateByVagrantfile() error {
 		executeCommand(fmt.Sprintf("cd %s && %s up", vc.workPath, vagrantCommand)).
 		updateVID().
 		record()
+
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to create VM with Vagrant: %+v", vc.err))
 		return vc.err
@@ -281,7 +290,10 @@ func (vc *vagrantCli) Halt() error {
 }
 
 func (vc *vagrantCli) Destroy() error {
-	vc.loadSpec().newSSHClient().executeCommand(fmt.Sprintf("%s destroy -f %s && rm -rf %s", vagrantCommand, vc.vmWithSpec.Spec.VID, vc.workPath)).remove()
+	vc.loadSpec().newSSHClient().executeCommand(
+		fmt.Sprintf("%s destroy -f %s && rm -rf %s && rm -f %s",
+			vagrantCommand, vc.vmWithSpec.Spec.VID, vc.workPath,
+			path.Join(vc.outputPath, vc.vmWithSpec.Name+".box"))).remove()
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to destroy VM with error: %+v", vc.err))
 		return vc.err

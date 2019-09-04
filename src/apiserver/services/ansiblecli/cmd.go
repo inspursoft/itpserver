@@ -78,7 +78,11 @@ func (ac *ansibleCli) transferPackage() *ansibleCli {
 		return ac
 	}
 	uploadSourcePath := filepath.Join(ac.uploadPath)
-	err := ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
+	err := ac.sshClient.CheckDir(uploadSourcePath)
+	if err != nil {
+		ac.err.InternalError(err)
+	}
+	err = ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
 	if err != nil {
 		ac.err.InternalError(err)
 	}

@@ -1,7 +1,10 @@
 package services
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path"
@@ -14,8 +17,8 @@ var pathPrefix = beego.AppConfig.String("pathprefix")
 var workpath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::baseworkpath"))
 var outputPath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::outputpath"))
 var artifactsURL = beego.AppConfig.String("nexus::url")
-var nexusUsername = beego.AppConfig.String("nexus:username")
-var nexusPassword = beego.AppConfig.String("nexus:password")
+var nexusUsername = beego.AppConfig.String("nexus::username")
+var nexusPassword = beego.AppConfig.String("nexus::password")
 
 func RetrieveVMFiles(vmName string) []string {
 	results := []string{}
@@ -47,18 +50,29 @@ func UploadArtifacts(vmName, repoName, principle string) error {
 	}
 	defer file.Close()
 	fileName := filepath.Base(boxFilepath)
-	artifactsURL := path.Join(artifactsURL, repoName, principle, fileName)
-	beego.Debug(fmt.Sprintf("Upload artifacts URL: %s", artifactsURL))
-	req, err := http.NewRequest(http.MethodPost, artifactsURL, nil)
+	bodyBuf := &bytes.Buffer{}
+	bodyWriter := multipart.NewWriter(bodyBuf)
+	fileWriter, err := bodyWriter.CreateFormFile("upload-file", fileName)
 	if err != nil {
 		return err
 	}
+	_, err = io.Copy(fileWriter, file)
+	if err != nil {
+		return err
+	}
+	defer bodyWriter.Close()
+	artifactsURL += "/" + path.Join(repoName, principle, fileName)
+	req, err := http.NewRequest(http.MethodPut, artifactsURL, bodyBuf)
+	if err != nil {
+		return err
+	}
+	beego.Debug(fmt.Sprintf("Upload artifacts URL: %s", artifactsURL))
 	req.SetBasicAuth(nexusUsername, nexusPassword)
-	client := http.Client{}
+	client := &http.Client{}
 	resp, err := client.Do(req)
 	if resp != nil && resp.StatusCode >= 400 {
-		err = fmt.Errorf("failed to upload artifacts with status code: %d", resp.StatusCode)
-		beego.Error(err)
+		err = fmt.Errorf("failed to request URL: %s with status code: %d", artifactsURL, resp.StatusCode)
+		beego.Debug(err.Error())
 		return err
 	}
 	beego.Debug(fmt.Sprintf("Successful uploaded file: %s to artifacts with URL: %s", fileName, artifactsURL))
