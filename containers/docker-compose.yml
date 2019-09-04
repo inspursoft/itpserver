@@ -23,6 +23,7 @@ services:
     volumes:
       - ../upload:/go/src/github.com/inspursoft/itpserver/src/apiserver/upload
       - ../upload-package:/go/src/github.com/inspursoft/itpserver/src/apiserver/upload-package
+      - ../vagrant-output:/go/src/github.com/inspursoft/itpserver/src/apiserver/vagrant-output
     networks:
       - itp
   proxy:
