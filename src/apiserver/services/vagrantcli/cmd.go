@@ -239,7 +239,7 @@ func (vc *vagrantCli) remove() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
 	}
-	beego.Debug("Removing VM with VID: %s", vc.vmWithSpec.Spec.VID)
+	beego.Debug(fmt.Sprintf("Removing VM with VID: %s", vc.vmWithSpec.Spec.VID))
 	err := services.NewVMHandler().DeleteVMByVID(vc.vmWithSpec.Spec.VID)
 	if err != nil {
 		vc.err.InternalError(err)
