@@ -21,9 +21,10 @@ services:
     ports:
       - "8088:8088"     
     volumes:
-      - ../upload:/go/src/github.com/inspursoft/itpserver/src/apiserver/upload
-      - ../upload-package:/go/src/github.com/inspursoft/itpserver/src/apiserver/upload-package
-      - ../vagrant-output:/go/src/github.com/inspursoft/itpserver/src/apiserver/vagrant-output
+      - /root/itp/ansible-cil:/root/itp/ansible-cli
+      - /root/itp/vagrant-sources:/root/itp/vagrant-sources
+      - /root/itp/vagrant-vms:/root/itp/vagrant-vms
+      - /root/itp/vagrant-output:/root/itp/vagrant-output
     networks:
       - itp
   proxy:
