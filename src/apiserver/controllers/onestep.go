@@ -27,6 +27,7 @@ func (ic *OneStepController) Post() {
 	ic.proxiedRequest(http.MethodPost, oneStep.VMWithSpec, "VMController.CreateBySpec")
 	ic.proxiedRequest(http.MethodPost, oneStep.PackageVO, "InstallationController.Post", ":vm_name", oneStep.VMWithSpec.Name)
 	ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", oneStep.VMWithSpec.Name)
+	ic.serveStatus(http.StatusOK, "Successful created by one step.")
 }
 
 // @Title Post
@@ -44,4 +45,5 @@ func (ic *OneStepController) PostWithVagrantfile() {
 	vmName := ic.requiredParam(":vm_name")
 	ic.proxiedRequest(http.MethodPost, nil, "VMController.CreateByVagrantfile", ":vm_name", vmName)
 	ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName)
+	ic.serveStatus(http.StatusOK, "Successful created by one step with Vagrantfile.")
 }
