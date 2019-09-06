@@ -129,6 +129,7 @@ func (bc *BaseController) proxiedRequest(method string, requestData interface{},
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	io.Copy(bc.Ctx.ResponseWriter, resp.Body)
+	bc.serveStatus(resp.StatusCode, "Finished handled proxied request.")
 }
 
 // @Title Get
