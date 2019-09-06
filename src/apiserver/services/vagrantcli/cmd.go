@@ -25,7 +25,6 @@ import (
 
 type vagrantCli struct {
 	sourcePath string
-	uploadPath string
 	workPath   string
 	outputPath string
 	command    string
@@ -37,13 +36,12 @@ type vagrantCli struct {
 
 var vagrantCommand = `PATH=/usr/local/bin:$PATH vagrant`
 var pathPrefix = beego.AppConfig.String("pathprefix")
-var uploadPath = beego.AppConfig.String("vagrant::uploadpath")
 var sourcePath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::sourcepath"))
 var baseWorkPath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::baseworkpath"))
 var outputPath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::outputpath"))
 
 func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *vagrantCli {
-	vc := &vagrantCli{sourcePath: sourcePath, uploadPath: uploadPath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
+	vc := &vagrantCli{sourcePath: sourcePath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
 		outputPath: outputPath, vmWithSpec: vmWithSpec, output: output, err: &models.ITPError{}}
 	return vc
 }
@@ -126,10 +124,9 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
 	}
-	vagrantFilePath := filepath.Join(vc.uploadPath, vc.vmWithSpec.Name, "Vagrantfile")
+	vagrantFilePath := filepath.Join(vc.workPath, "Vagrantfile")
 	if _, err := os.Stat(vagrantFilePath); os.IsNotExist(err) {
-		errMessage := "Vagrantfile does not exist."
-		vc.err.Notfound(errMessage, errors.New(errMessage))
+		vc.err.Notfound("Vagrantfile does not exist", err)
 		return vc
 	}
 	f, err := os.Open(vagrantFilePath)
@@ -174,23 +171,6 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	}
 	if exists {
 		vc.err.Conflict(fmt.Sprintf("VM: %s already exist.", vc.vmWithSpec.Name), fmt.Errorf("VM %s already exist", vc.vmWithSpec.Name))
-	}
-	return vc
-}
-
-func (vc *vagrantCli) transferPackages() *vagrantCli {
-	if !vc.err.HasNoError() {
-		return vc
-	}
-	vmName := vc.vmWithSpec.Name
-	if vmName == "" {
-		vc.err.Notfound("VM", fmt.Errorf("VM name is required"))
-		return vc
-	}
-	uploadSourcePath := filepath.Join(vc.uploadPath, vmName)
-	err := vc.sshClient.SecureCopy(uploadSourcePath, vc.workPath)
-	if err != nil {
-		vc.err.InternalError(err)
 	}
 	return vc
 }
@@ -274,7 +254,6 @@ func (vc *vagrantCli) CreateByVagrantfile() error {
 		checkDirs().
 		copySources().
 		resolveVagrantfile().
-		transferPackages().
 		executeCommand(fmt.Sprintf("cd %s && %s up", vc.workPath, vagrantCommand)).
 		updateVID().
 		record()

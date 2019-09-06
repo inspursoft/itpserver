@@ -10,6 +10,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/inspursoft/itpserver/src/apiserver/models"
+
 	"github.com/astaxie/beego"
 )
 
@@ -20,20 +22,26 @@ var artifactsURL = beego.AppConfig.String("nexus::url")
 var nexusUsername = beego.AppConfig.String("nexus::username")
 var nexusPassword = beego.AppConfig.String("nexus::password")
 
-func RetrieveVMFiles(vmName string) []string {
+func RetrieveVMFiles(vmName string) ([]string, *models.ITPError) {
+	e := &models.ITPError{}
+	targetPath := filepath.Join(workpath, vmName)
+	if _, err := os.Stat(targetPath); os.IsNotExist(err) {
+		e.Notfound(targetPath, err)
+		return nil, e
+	}
 	results := []string{}
-	filepath.Walk(filepath.Join(workpath, vmName), func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(targetPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			beego.Error(fmt.Sprintf("Failed to retrieve VM files: %+v", err))
+			e.InternalError(fmt.Errorf("Failed to retrieve VM files: %+v", err))
 			return err
 		}
-		if info.IsDir() {
-			return nil
+		relPath, _ := filepath.Rel(filepath.FromSlash(targetPath), path)
+		if !(relPath[0:1] == "." || info.IsDir()) {
+			results = append(results, relPath)
 		}
-		results = append(results, filepath.Base(path))
 		return nil
 	})
-	return results
+	return results, e
 }
 
 func ResolveBoxFilePath(vmName string) string {

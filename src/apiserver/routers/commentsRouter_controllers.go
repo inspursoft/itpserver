@@ -9,15 +9,6 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"],
         beego.ControllerComments{
-            Method: "List",
-            Router: `/`,
-            AllowHTTPMethods: []string{"get"},
-            MethodParams: param.Make(),
-            Filters: nil,
-            Params: nil})
-
-    beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"],
-        beego.ControllerComments{
             Method: "Download",
             Router: `/download`,
             AllowHTTPMethods: []string{"get"},

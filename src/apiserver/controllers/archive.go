@@ -46,28 +46,6 @@ func (ac *ArchiveController) Upload() {
 	}
 }
 
-// @Title List archive
-// @Description List packaged VM box from ITP service.
-// @Param Authorization	header	string	true	"Set authorization info."
-// @Param	vm_name	query 	string	true		"VM name."
-// @Success 200 Successful download packaged VM box from ITP service.
-// @Failure 400 Bad request.
-// @Failure 401 Unauthorized.
-// @Failure 403 The resouce specified was forbidden to access.
-// @Failure 404 The resource specified was not found.
-// @Failure 500 Internal error occurred at server side.
-// @router / [get]
-func (ac *ArchiveController) List() {
-	vmName := ac.GetString("vm_name")
-	vm, err := services.NewVMHandler().GetByName(vmName)
-	ac.handleError(err)
-	if vm == nil {
-		ac.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM with name: %s does not exist.", vmName))
-	}
-	results := services.RetrieveVMFiles(vmName)
-	ac.serveJSON(results)
-}
-
 // @Title Download archive
 // @Description Download packaged VM box from ITP service.
 // @Param Authorization	header	string	true	"Set authorization info."

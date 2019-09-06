@@ -18,6 +18,8 @@ type PackagesController struct {
 // @Title Get
 // @Description Return a list of software packages.
 // @Param Authorization	header	string	true	"Set authorization info."
+// @Param source_type	query	string	false	"The source type to retrieve."
+// @Param vm_name	query	string	false	"VM name."
 // @Param	name	query 	string	false		"The software package name to return"
 // @Param tag	query string false "The software package tag to return"
 // @Success 200 Successful get all or filter software packages by name.
@@ -28,13 +30,20 @@ type PackagesController struct {
 // @Failure 500 Internal error occurred at server side.
 // @router / [get]
 func (pc *PackagesController) Get() {
+	sourceType := pc.GetString("source_type", "ansible")
+	if sourceType == "vagrantfile" {
+		vmName := pc.requiredParam("vm_name")
+		fileList, err := services.RetrieveVMFiles(vmName)
+		pc.handleError(err)
+		pc.serveJSON(fileList)
+		return
+	}
 	pkgName := pc.GetString("name", "")
 	pkgTag := pc.GetString("tag", "")
-
 	handler := services.NewPackageHandler()
 	var resp interface{}
 	var err error
-	if pkgName == "" || pkgTag == "" {
+	if pkgName == "" {
 		resp, err = handler.GetAll()
 	} else {
 		resp, err = handler.Get(pkgName, pkgTag)
@@ -67,7 +76,8 @@ func (pc *PackagesController) Upload() {
 	var uploadPath string
 	if sourceType == "vagrantfile" {
 		vmName = pc.requiredParam("vm_name")
-		uploadPath = beego.AppConfig.String("vagrant::uploadpath")
+		pathPrefix := beego.AppConfig.String("pathprefix")
+		uploadPath = filepath.Join(pathPrefix, beego.AppConfig.String("vagrant::baseworkpath"))
 	} else {
 		if !utils.CheckFileExt(sourceName, ".zip") {
 			pc.CustomAbort(http.StatusBadRequest, "Only allows file with zip extension.")
