@@ -126,7 +126,13 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
 	}
-	f, err := os.Open(filepath.Join(vc.uploadPath, vc.vmWithSpec.Name, "Vagrantfile"))
+	vagrantFilePath := filepath.Join(vc.uploadPath, vc.vmWithSpec.Name, "Vagrantfile")
+	if _, err := os.Stat(vagrantFilePath); os.IsNotExist(err) {
+		errMessage := "Vagrantfile does not exist."
+		vc.err.Notfound(errMessage, errors.New(errMessage))
+		return vc
+	}
+	f, err := os.Open(vagrantFilePath)
 	if err != nil {
 		vc.err.InternalError(err)
 		return vc
@@ -267,8 +273,8 @@ func (vc *vagrantCli) CreateByVagrantfile() error {
 	vc.newSSHClient().
 		checkDirs().
 		copySources().
-		transferPackages().
 		resolveVagrantfile().
+		transferPackages().
 		executeCommand(fmt.Sprintf("cd %s && %s up", vc.workPath, vagrantCommand)).
 		updateVID().
 		record()
