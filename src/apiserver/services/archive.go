@@ -69,12 +69,12 @@ func UploadArtifacts(vmName, repoName, principle string) error {
 		return err
 	}
 	defer bodyWriter.Close()
-	artifactsURL += "/" + path.Join(repoName, principle, fileName)
-	req, err := http.NewRequest(http.MethodPut, artifactsURL, bodyBuf)
+	uploadURL := artifactsURL + "/" + path.Join(repoName, principle, fileName)
+	req, err := http.NewRequest(http.MethodPut, uploadURL, bodyBuf)
 	if err != nil {
 		return err
 	}
-	beego.Debug(fmt.Sprintf("Upload artifacts URL: %s", artifactsURL))
+	beego.Debug(fmt.Sprintf("Upload artifacts URL: %s", uploadURL))
 	req.SetBasicAuth(nexusUsername, nexusPassword)
 	client := &http.Client{}
 	resp, err := client.Do(req)

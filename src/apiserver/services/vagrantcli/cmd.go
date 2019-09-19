@@ -126,7 +126,7 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	}
 	vagrantFilePath := filepath.Join(vc.workPath, "Vagrantfile")
 	if _, err := os.Stat(vagrantFilePath); os.IsNotExist(err) {
-		vc.err.Notfound("Vagrantfile does not exist", err)
+		vc.err.Notfound("Vagrantfile", err)
 		return vc
 	}
 	f, err := os.Open(vagrantFilePath)
@@ -161,7 +161,7 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	}
 	if vc.vmWithSpec.IP == "" || vc.vmWithSpec.OS == "" ||
 		vc.vmWithSpec.Spec.CPUs == 0 || vc.vmWithSpec.Spec.Memory == "" {
-		vc.err.Notfound("Vagrantfile missing required values.", errors.New("Vagrantfile missing required values"))
+		vc.err.Notfound("Vagrantfile", errors.New("Vagrantfile is missing as required value"))
 		return vc
 	}
 	exists, err := services.NewVMHandler().Exists(models.VM{IP: vc.vmWithSpec.IP, Name: vc.vmWithSpec.Name})
