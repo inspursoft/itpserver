@@ -40,7 +40,8 @@ func (ac *ArchiveController) Upload() {
 	if len(strings.TrimSpace(principle)) == 0 {
 		ac.CustomAbort(http.StatusBadGateway, "Principle is required.")
 	}
-	err = services.UploadArtifacts(vmName, repoName, principle)
+
+	err = services.UploadArtifacts(vmName, repoName, principle, ac.Ctx.ResponseWriter)
 	if err != nil {
 		ac.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Failed to upload artifacts: %+v", err))
 	}
