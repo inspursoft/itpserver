@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
 
@@ -95,7 +96,7 @@ func (pc *PackagesController) Upload() {
 	sshClient, err := utils.NewSecureShell(pc.Ctx.ResponseWriter)
 	err = sshClient.SecureCopy(targetPath, targetPath)
 	if err != nil {
-		pc.handleError(err)
+		beego.Error(fmt.Sprint("Failed to SCP with err: %+v", err))
 	}
 	pkg := models.PackageVO{Name: utils.FileNameWithoutExt(sourceName), SourceName: sourceName}
 	handler := services.NewPackageHandler()
