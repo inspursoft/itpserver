@@ -23,10 +23,10 @@ var outputPath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::outputpa
 var artifactsURL = beego.AppConfig.String("nexus::url")
 var nexusUsername = beego.AppConfig.String("nexus::username")
 var nexusPassword = beego.AppConfig.String("nexus::password")
-var sshUsername = beego.AppConfig.String("ssh::username")
-var sshPassword = beego.AppConfig.String("ssh::password")
-var sshHost = beego.AppConfig.String("ssh::host")
-var sshPort = beego.AppConfig.String("ssh::port")
+var sshUsername = beego.AppConfig.String("ssh-host::username")
+var sshPassword = beego.AppConfig.String("ssh-host::password")
+var sshHost = beego.AppConfig.String("ssh-host::host")
+var sshPort = beego.AppConfig.String("ssh-host::port")
 
 func RetrieveVMFiles(vmName string) ([]string, *models.ITPError) {
 	e := &models.ITPError{}
@@ -62,7 +62,7 @@ func UploadArtifacts(vmName, repoName, principle string, output io.Writer) error
 		return err
 	}
 	boxFilepath := ResolveBoxFilePath(vmName)
-	scpCommand := fmt.Sprintf("scp -P %s %s@%s:%s %s", sshPort, sshUsername, sshHost, boxFilepath, outputPath)
+	scpCommand := fmt.Sprintf("scp -P %s %s %s@%s:%s ", sshPort, boxFilepath, sshUsername, sshHost, outputPath)
 	beego.Debug(fmt.Sprintf("SCP command: %s", scpCommand))
 	err = sshClient.ExecuteCommand(scpCommand)
 	if err != nil {
