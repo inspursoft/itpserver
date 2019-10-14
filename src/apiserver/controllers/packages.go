@@ -92,6 +92,11 @@ func (pc *PackagesController) Upload() {
 	if err != nil {
 		pc.handleError(err)
 	}
+	sshClient, err := utils.NewSecureShell(pc.Ctx.ResponseWriter)
+	err = sshClient.SecureCopy(targetPath, targetPath)
+	if err != nil {
+		pc.handleError(err)
+	}
 	pkg := models.PackageVO{Name: utils.FileNameWithoutExt(sourceName), SourceName: sourceName}
 	handler := services.NewPackageHandler()
 	handler.Create(pkg)
