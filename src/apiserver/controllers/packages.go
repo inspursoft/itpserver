@@ -89,14 +89,15 @@ func (pc *PackagesController) Upload() {
 	if err != nil {
 		pc.handleError(err)
 	}
-	err = pc.SaveToFile("pkg", filepath.Join(targetPath, sourceName))
+	targetFullPath := filepath.Join(targetPath, sourceName)
+	err = pc.SaveToFile("pkg", targetFullPath)
 	if err != nil {
 		pc.handleError(err)
 	}
 	sshClient, err := utils.NewSecureShell(pc.Ctx.ResponseWriter)
-	err = sshClient.SecureCopy(targetPath, targetPath)
+	err = sshClient.SecureCopy(targetFullPath, targetFullPath)
 	if err != nil {
-		beego.Error(fmt.Sprint("Failed to SCP with err: %+v", err))
+		beego.Error(fmt.Sprintf("Failed to SCP with err: %+v", err))
 	}
 	pkg := models.PackageVO{Name: utils.FileNameWithoutExt(sourceName), SourceName: sourceName}
 	handler := services.NewPackageHandler()
