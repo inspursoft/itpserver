@@ -74,16 +74,16 @@ func (pc *PackagesController) Upload() {
 	sourceName := fh.Filename
 	vmName := pc.GetString("vm_name", "")
 	sourceType := pc.GetString("source_type", "ansible")
+	pathPrefix := beego.AppConfig.String("pathprefix")
 	var uploadPath string
 	if sourceType == "vagrantfile" {
 		vmName = pc.requiredParam("vm_name")
-		pathPrefix := beego.AppConfig.String("pathprefix")
 		uploadPath = filepath.Join(pathPrefix, beego.AppConfig.String("vagrant::baseworkpath"))
 	} else {
 		if !utils.CheckFileExt(sourceName, ".zip") {
 			pc.CustomAbort(http.StatusBadRequest, "Only allows file with zip extension.")
 		}
-		uploadPath = beego.AppConfig.String("ansible::uploadpath")
+		uploadPath = filepath.Join(pathPrefix, beego.AppConfig.String("ansible::uploadpath"))
 	}
 	targetPath, err := utils.CheckDirs(filepath.Join(uploadPath, vmName))
 	if err != nil {
