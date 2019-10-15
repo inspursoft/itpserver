@@ -32,8 +32,8 @@ var ansibleCommand = "PATH=/usr/local/bin:$PATH ansible-playbook"
 
 func NewClient(vmWithSpec models.VMWithSpec, pkg models.PackageVO, output io.Writer) *ansibleCli {
 	hostIP := beego.AppConfig.String("ansible::hostip")
-	uploadPath := beego.AppConfig.String("ansible::uploadpath")
 	pathPrefix := beego.AppConfig.String("pathprefix")
+	uploadPath := path.Join(pathPrefix, beego.AppConfig.String("ansible::uploadpath"))
 	sourcePath := path.Join(pathPrefix, beego.AppConfig.String("ansible::sourcepath"))
 	baseWorkPath := path.Join(pathPrefix, beego.AppConfig.String("ansible::baseworkpath"))
 	ac := &ansibleCli{hostIP: hostIP,
@@ -82,10 +82,10 @@ func (ac *ansibleCli) transferPackage() *ansibleCli {
 	if err != nil {
 		ac.err.InternalError(err)
 	}
-	err = ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
-	if err != nil {
-		ac.err.InternalError(err)
-	}
+	// err = ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
+	// if err != nil {
+	// 	ac.err.InternalError(err)
+	// }
 	return ac
 }
 
