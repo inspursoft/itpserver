@@ -95,7 +95,13 @@ func (pc *PackagesController) Upload() {
 		pc.handleError(err)
 	}
 	sshClient, err := utils.NewSecureShell(pc.Ctx.ResponseWriter)
-	err = sshClient.SecureCopy(targetFullPath, targetFullPath)
+
+	sshHost := beego.AppConfig.String("ssh-host::host")
+	sshPort := beego.AppConfig.String("ssh-host::port")
+	sshUsername := beego.AppConfig.String("ssh-host::username")
+	scpCommand := fmt.Sprintf("scp -P %s %s@%s:%s %s", sshPort, sshUsername, sshHost, targetFullPath, targetFullPath)
+	beego.Debug(fmt.Sprintf("SCP command is: %s", scpCommand))
+	err = sshClient.ExecuteCommand(scpCommand)
 	if err != nil {
 		beego.Error(fmt.Sprintf("Failed to SCP with err: %+v", err))
 	}
