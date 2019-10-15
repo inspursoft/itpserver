@@ -99,7 +99,7 @@ func (pc *PackagesController) Upload() {
 	sshHost := beego.AppConfig.String("ssh-host::host")
 	sshPort := beego.AppConfig.String("ssh-host::port")
 	sshUsername := beego.AppConfig.String("ssh-host::username")
-	scpCommand := fmt.Sprintf("mkdir %s && scp -P %s %s@%s:%s %s", targetPath, sshPort, sshUsername, sshHost, targetFullPath, targetFullPath)
+	scpCommand := fmt.Sprintf("mkdir -p %s && scp -P %s %s@%s:%s %s", targetPath, sshPort, sshUsername, sshHost, targetFullPath, targetFullPath)
 	beego.Debug(fmt.Sprintf("SCP command is: %s", scpCommand))
 	err = sshClient.ExecuteCommand(scpCommand)
 	if err != nil {
