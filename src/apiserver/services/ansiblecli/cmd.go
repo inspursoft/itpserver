@@ -82,6 +82,15 @@ func (ac *ansibleCli) transferPackage() *ansibleCli {
 	if err != nil {
 		ac.err.InternalError(err)
 	}
+	sshHost := beego.AppConfig.String("ssh-host::host")
+	sshPort := beego.AppConfig.String("ssh-host::port")
+	sshUsername := beego.AppConfig.String("ssh-host::username")
+	scpCommand := fmt.Sprintf("mkdir -p %s && scp -P %s %s@%s:%s %s", ac.workPath, sshPort, sshUsername, sshHost, uploadSourcePath, ac.workPath)
+	beego.Debug(fmt.Sprintf("SCP command is: %s", scpCommand))
+	err = ac.sshClient.ExecuteCommand(scpCommand)
+	if err != nil {
+		beego.Error(fmt.Sprintf("Failed to SCP with err: %+v", err))
+	}
 	// err = ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
 	// if err != nil {
 	// 	ac.err.InternalError(err)
