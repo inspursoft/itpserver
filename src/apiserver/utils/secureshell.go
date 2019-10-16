@@ -121,3 +121,15 @@ func (s *SecureShell) CheckDir(dir string) error {
 func (s *SecureShell) RemoveDir(dir string) error {
 	return s.ExecuteCommand(fmt.Sprintf("rm -rf %s", dir))
 }
+
+func (s *SecureShell) HostSCP(sourcePath, targetPath string, reversed bool) error {
+	sshHost := beego.AppConfig.String("ssh-host::host")
+	sshPort := beego.AppConfig.String("ssh-host::port")
+	sshUsername := beego.AppConfig.String("ssh-host::username")
+	scpCommand := fmt.Sprintf("scp -P %s %s@%s:%s %s", sshPort, sshUsername, sshHost, sourcePath, targetPath)
+	if reversed {
+		scpCommand = fmt.Sprintf("scp -P %s %s %s@%s:%s", sshPort, sshUsername, sshHost, sourcePath, targetPath)
+	}
+	beego.Debug(fmt.Sprintf("Host SCP command is: %s", scpCommand))
+	return s.ExecuteCommand(scpCommand)
+}

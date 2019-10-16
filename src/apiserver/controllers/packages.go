@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"path/filepath"
 
@@ -94,16 +93,21 @@ func (pc *PackagesController) Upload() {
 	if err != nil {
 		pc.handleError(err)
 	}
-	sshClient, err := utils.NewSecureShell(pc.Ctx.ResponseWriter)
-
-	sshHost := beego.AppConfig.String("ssh-host::host")
-	sshPort := beego.AppConfig.String("ssh-host::port")
-	sshUsername := beego.AppConfig.String("ssh-host::username")
-	scpCommand := fmt.Sprintf("mkdir -p %s && scp -P %s %s@%s:%s %s", targetPath, sshPort, sshUsername, sshHost, targetFullPath, targetFullPath)
-	beego.Debug(fmt.Sprintf("SCP command is: %s", scpCommand))
-	err = sshClient.ExecuteCommand(scpCommand)
-	if err != nil {
-		beego.Error(fmt.Sprintf("Failed to SCP with err: %+v", err))
+	hostMode, _ := beego.AppConfig.Bool("hostmode")
+	if !hostMode {
+		beego.Debug("Running under Cross Host mode ...")
+		sshClient, err := utils.NewSecureShell(pc.Ctx.ResponseWriter)
+		if err != nil {
+			pc.handleError(err)
+		}
+		err = sshClient.CheckDir(targetPath)
+		if err != nil {
+			pc.handleError(err)
+		}
+		err = sshClient.HostSCP(targetFullPath, targetFullPath, false)
+		if err != nil {
+			pc.handleError(err)
+		}
 	}
 	pkg := models.PackageVO{Name: utils.FileNameWithoutExt(sourceName), SourceName: sourceName}
 	handler := services.NewPackageHandler()

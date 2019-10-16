@@ -23,10 +23,7 @@ var outputPath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::outputpa
 var artifactsURL = beego.AppConfig.String("nexus::url")
 var nexusUsername = beego.AppConfig.String("nexus::username")
 var nexusPassword = beego.AppConfig.String("nexus::password")
-var sshUsername = beego.AppConfig.String("ssh-host::username")
-var sshPassword = beego.AppConfig.String("ssh-host::password")
-var sshHost = beego.AppConfig.String("ssh-host::host")
-var sshPort = beego.AppConfig.String("ssh-host::port")
+var hostMode, _ = beego.AppConfig.Bool("hostmode")
 
 func RetrieveVMFiles(vmName string) ([]string, *models.ITPError) {
 	e := &models.ITPError{}
@@ -57,16 +54,17 @@ func ResolveBoxFilePath(vmName string) string {
 }
 
 func UploadArtifacts(vmName, repoName, principle string, output io.Writer) error {
-	sshClient, err := utils.NewSecureShell(output)
-	if err != nil {
-		return err
-	}
 	boxFilepath := ResolveBoxFilePath(vmName)
-	scpCommand := fmt.Sprintf("scp -P %s %s %s@%s:%s ", sshPort, boxFilepath, sshUsername, sshHost, outputPath)
-	beego.Debug(fmt.Sprintf("SCP command: %s", scpCommand))
-	err = sshClient.ExecuteCommand(scpCommand)
-	if err != nil {
-		return err
+	if !hostMode {
+		beego.Debug("Running under Cross host mode ...")
+		sshClient, err := utils.NewSecureShell(output)
+		if err != nil {
+			return err
+		}
+		err = sshClient.HostSCP(boxFilepath, outputPath, true)
+		if err != nil {
+			return err
+		}
 	}
 	file, err := os.Open(boxFilepath)
 	if err != nil {

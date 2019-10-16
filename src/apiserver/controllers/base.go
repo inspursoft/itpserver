@@ -94,9 +94,8 @@ func (bc *BaseController) handleError(err error) {
 				fmt.Printf("%+v\n", e)
 				bc.CustomAbort(e.Status(), e.Error())
 			}
-		}
-		if models.AssertITPError(err) != nil {
-			bc.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Error occurred: %+v", err))
+		} else {
+			bc.CustomAbort(http.StatusInternalServerError, err.Error())
 		}
 	}
 }
