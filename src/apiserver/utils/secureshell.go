@@ -128,7 +128,7 @@ func (s *SecureShell) HostSCP(sourcePath, targetPath string, reversed bool) erro
 	sshUsername := beego.AppConfig.String("ssh-host::username")
 	scpCommand := fmt.Sprintf("scp -P %s %s@%s:%s %s", sshPort, sshUsername, sshHost, sourcePath, targetPath)
 	if reversed {
-		scpCommand = fmt.Sprintf("scp -P %s %s %s@%s:%s", sshPort, sshUsername, sshHost, sourcePath, targetPath)
+		scpCommand = fmt.Sprintf("scp -P %s %s %s@%s:%s", sshPort, sourcePath, sshUsername, sshHost, sourcePath)
 	}
 	beego.Debug(fmt.Sprintf("Host SCP command is: %s", scpCommand))
 	return s.ExecuteCommand(scpCommand)

@@ -57,6 +57,10 @@ func UploadArtifacts(vmName, repoName, principle string, output io.Writer) error
 	boxFilepath := ResolveBoxFilePath(vmName)
 	if !hostMode {
 		beego.Debug("Running under Cross host mode ...")
+		_, err := utils.CheckDirs(outputPath)
+		if err != nil {
+			return err
+		}
 		sshClient, err := utils.NewSecureShell(output)
 		if err != nil {
 			return err
