@@ -39,7 +39,8 @@ func (bc *BaseController) Prepare() {
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 	oidcConfig := &oidc.Config{
-		ClientID: clientID,
+		ClientID:          clientID,
+		SkipClientIDCheck: true,
 	}
 	verifier := provider.Verifier(oidcConfig)
 	rawAccessToken := bc.Ctx.Input.Header("Authorization")
