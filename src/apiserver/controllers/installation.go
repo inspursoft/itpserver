@@ -41,6 +41,7 @@ func (ic *InstallationController) Get() {
 // @Description Install selected software packages onto a virtual machine.
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	vm_name		path 	string	true		"The virtual machine name which wants to install software packages."
+// @Param is_config_provided	query	int	false	"The config which is about Ansible installation package whether it is provided or not."
 // @Param	pkg		body 	models.PackageVO	true		"The virtual machine ID which wants to install software packages."
 // @Success 200 Successful installed software package onto a virtual machine.
 // @Failure 400 Bad request.
@@ -62,7 +63,16 @@ func (ic *InstallationController) Post() {
 	var pkg models.PackageVO
 	ic.loadRequestBody(&pkg)
 	cli := ansiblecli.NewClient(vmWithSpec, pkg, ic.Ctx.ResponseWriter)
-	err = cli.Transfer()
+
+	isConfigProvided, err := ic.GetInt("is_config_provided", 0)
+	if err != nil {
+		ic.handleError(err)
+	}
+	if isConfigProvided == 1 {
+		err = cli.TransferWithoutGenerateConfig()
+	} else {
+		err = cli.Transfer()
+	}
 	if err != nil {
 		ic.handleError(err)
 	}

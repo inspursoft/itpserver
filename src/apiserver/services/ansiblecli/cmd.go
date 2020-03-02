@@ -199,6 +199,19 @@ func (ac *ansibleCli) Transfer() error {
 	return nil
 }
 
+func (ac *ansibleCli) TransferWithoutGenerateConfig() error {
+	beego.Debug("Start transfering without generating configures...")
+	ac.init().
+		transferPackage().
+		unzipPackage().
+		recordPackage()
+	if !ac.err.HasNoError() && ac.err != nil {
+		beego.Error(fmt.Sprintf("Failed to transfer package without generating configs to server: %+v", ac.err))
+		return ac.err
+	}
+	return nil
+}
+
 func (ac *ansibleCli) Install() error {
 	targetPath := filepath.Join(ac.workPath, ac.pkg.Name)
 	ac.init().
