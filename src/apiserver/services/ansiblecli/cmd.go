@@ -219,6 +219,7 @@ func (ac *ansibleCli) TransferWithoutGenerateConfig() error {
 	ac.init().
 		transferPackage().
 		unzipPackage().
+		preExecution().
 		recordPackage()
 	if !ac.err.HasNoError() && ac.err != nil {
 		beego.Error(fmt.Sprintf("Failed to transfer package without generating configs to server: %+v", ac.err))
