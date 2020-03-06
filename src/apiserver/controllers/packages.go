@@ -17,7 +17,8 @@ type PackagesController struct {
 
 // @Title Get
 // @Description Return a list of software packages.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param source_type	query	string	false	"The source type to retrieve."
 // @Param vm_name	query	string	false	"VM name."
 // @Param	name	query 	string	false		"The software package name to return"
@@ -54,7 +55,8 @@ func (pc *PackagesController) Get() {
 
 // @Title Upload package.
 // @Description Upload software package.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param source_type	query	string	false	"Source type for upload"
 // @Param	pkg	formData	file	true		"The package to be uploaded."
 // @Param	vm_name	query	string	false	"The target VM to upload packages."
@@ -116,7 +118,8 @@ func (pc *PackagesController) Upload() {
 
 // @Title Delete
 // @Description Delete software package by name and tag.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	package_name	query 	string	true		"The software package name to be deleted."
 // @Param	package_tag		query 	string	false		"The software package tag to be deleted."
 // @Success 200 Successful submitted information about software package.

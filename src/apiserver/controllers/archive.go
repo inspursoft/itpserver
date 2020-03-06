@@ -14,7 +14,8 @@ type ArchiveController struct {
 
 // @Title Upload archive
 // @Description Upload packaged VM box onto remote Nexus service.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name	query	string	true	"VM name."
 // @Param	repo_name	query	string	true	"Repository name."
 // @Param	principle	query	string	true	"Principle name."
@@ -49,7 +50,8 @@ func (ac *ArchiveController) Upload() {
 
 // @Title Download archive
 // @Description Download packaged VM box from ITP service.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name	query 	string	true		"VM name."
 // @Success 200 Successful download packaged VM box from ITP service.
 // @Failure 400 Bad request.

@@ -15,7 +15,8 @@ type InstallationController struct {
 
 // @Title Get
 // @Description Get virtual machines with software packages installed.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name		query 	string	true		"The virtual machine ID which installed software packages."
 // @Success 200 Successful get virtual machines with software package installed.
 // @Failure 400 Bad request.
@@ -39,7 +40,8 @@ func (ic *InstallationController) Get() {
 
 // @Title Post
 // @Description Install selected software packages onto a virtual machine.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name		path 	string	true		"The virtual machine name which wants to install software packages."
 // @Param is_config_provided	query	int	false	"The config which is about Ansible installation package whether it is provided or not."
 // @Param	pkg		body 	models.PackageVO	true		"The virtual machine ID which wants to install software packages."
@@ -84,7 +86,8 @@ func (ic *InstallationController) Post() {
 
 // @Title Delete
 // @Description Delete selected virtual machine which with software package installed.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name	path 	string	true		"The virtual machine ID to be deleted."
 // @Param pkg_name	query	string	true	"The package name to be deleted on VM."
 // @Param pkg_tag	query	string	false	"The package tag to be deleted on VM."

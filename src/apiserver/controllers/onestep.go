@@ -12,7 +12,8 @@ type OneStepController struct {
 
 // @Title Post
 // @Description One step to create VM and install software onto it.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	one_step	body 	models.OneStepInstallation	true		"The virual machine to submit."
 // @Success 200 Successful installed software package onto a virtual machine.
 // @Failure 400 Bad request.
@@ -31,7 +32,8 @@ func (ic *OneStepController) Post() {
 
 // @Title Post
 // @Description One step to create VM and install software onto it.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name	path	string	true	"VM name."
 // @Success 200 Successful installed software package onto a virtual machine.
 // @Failure 400 Bad request.

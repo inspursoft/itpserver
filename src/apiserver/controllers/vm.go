@@ -15,7 +15,7 @@ type VMController struct {
 // @Title Get VM.
 // @Description Returns a list of virtual machines or filtered by VM ID.
 // @Param	access_token	query	string	false	"Optional access token."
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	id		query 	int64	false		"The virual machine name to return."
 // @Success 200 Successful get all or filter virtual machine by name.
 // @Failure 400 Bad request.
@@ -40,7 +40,8 @@ func (v *VMController) Get() {
 
 // @Title Create VM with spec.
 // @Description Submit to create a virtual machine.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_with_spec	body 	models.VMWithSpec	false		"The virual machine to submit."
 // @Success 200 Successful submitted virtual machine.
 // @Failure 400 Bad request.
@@ -59,7 +60,8 @@ func (v *VMController) CreateBySpec() {
 
 // @Title Create VM by Vagrantfile.
 // @Description Submit to create a virtual machine.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param vm_name	path	string	true	"Specify the VM name."
 // @Success 200	Successful submitted virtual machine.
 // @Failure 400 Bad request.
@@ -77,7 +79,8 @@ func (v *VMController) CreateByVagrantfile() {
 
 // @Title Package VM into box.
 // @Description Package a virtual machine.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name	path 	string	true		"The virtual machine name to be packaged."
 // @Success 200 Successful deleted virtual machine by name.
 // @Failure 400 Bad request.
@@ -97,7 +100,8 @@ func (v *VMController) Package() {
 
 // @Title Delete
 // @Description Delete a virtual machine by ID.
-// @Param Authorization	header	string	true	"Set authorization info."
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
 // @Param	vm_name	query 	string	true		"The virtual machine name to be deleted."
 // @Success 200 Successful deleted virtual machine by name.
 // @Failure 400 Bad request.
