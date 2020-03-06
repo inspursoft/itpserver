@@ -16,7 +16,7 @@ type AuthController struct {
 
 // @Title Get
 // @Description Returns token info registered from Keycloak.
-// @Success 200 {string} 	Successful returned token info from Keycloak.
+// @Success 200 Successful returned token info from Keycloak.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.

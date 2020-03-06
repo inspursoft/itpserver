@@ -1,6 +1,6 @@
 package models
 
 type OneStepInstallation struct {
-	VMWithSpec *VMWithSpec
-	PackageVO  *PackageVO
+	VMWithSpec *VMWithSpec `json:"vm_with_spec"`
+	PackageVO  *PackageVO  `json:"package_vo"`
 }

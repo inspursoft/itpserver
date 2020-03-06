@@ -25,7 +25,6 @@ import (
 
 type vagrantCli struct {
 	sourcePath string
-	uploadPath string
 	workPath   string
 	outputPath string
 	command    string
@@ -37,13 +36,12 @@ type vagrantCli struct {
 
 var vagrantCommand = `PATH=/usr/local/bin:$PATH vagrant`
 var pathPrefix = beego.AppConfig.String("pathprefix")
-var uploadPath = beego.AppConfig.String("vagrant::uploadpath")
 var sourcePath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::sourcepath"))
 var baseWorkPath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::baseworkpath"))
 var outputPath = path.Join(pathPrefix, beego.AppConfig.String("vagrant::outputpath"))
 
 func NewClient(vmWithSpec models.VMWithSpec, output io.Writer) *vagrantCli {
-	vc := &vagrantCli{sourcePath: sourcePath, uploadPath: uploadPath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
+	vc := &vagrantCli{sourcePath: sourcePath, workPath: filepath.Join(baseWorkPath, vmWithSpec.Name),
 		outputPath: outputPath, vmWithSpec: vmWithSpec, output: output, err: &models.ITPError{}}
 	return vc
 }
@@ -126,8 +124,12 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
 	}
-
-	f, err := os.Open(filepath.Join(vc.uploadPath, vc.vmWithSpec.Name, "Vagrantfile"))
+	vagrantFilePath := filepath.Join(vc.workPath, "Vagrantfile")
+	if _, err := os.Stat(vagrantFilePath); os.IsNotExist(err) {
+		vc.err.Notfound("Vagrantfile", err)
+		return vc
+	}
+	f, err := os.Open(vagrantFilePath)
 	if err != nil {
 		vc.err.InternalError(err)
 		return vc
@@ -159,24 +161,16 @@ func (vc *vagrantCli) resolveVagrantfile() *vagrantCli {
 	}
 	if vc.vmWithSpec.IP == "" || vc.vmWithSpec.OS == "" ||
 		vc.vmWithSpec.Spec.CPUs == 0 || vc.vmWithSpec.Spec.Memory == "" {
-		vc.err.Notfound("Vagrantfile missing required values.", errors.New("Vagrantfile missing required values"))
-	}
-	return vc
-}
-
-func (vc *vagrantCli) transferPackages() *vagrantCli {
-	if !vc.err.HasNoError() {
+		vc.err.Notfound("Vagrantfile", errors.New("Vagrantfile is missing as required value"))
 		return vc
 	}
-	vmName := vc.vmWithSpec.Name
-	if vmName == "" {
-		vc.err.Notfound("VM", fmt.Errorf("VM name is required"))
-		return vc
-	}
-	uploadSourcePath := filepath.Join(vc.uploadPath, vmName)
-	err := vc.sshClient.SecureCopy(uploadSourcePath, vc.workPath)
+	exists, err := services.NewVMHandler().Exists(models.VM{IP: vc.vmWithSpec.IP, Name: vc.vmWithSpec.Name})
 	if err != nil {
 		vc.err.InternalError(err)
+		return vc
+	}
+	if exists {
+		vc.err.Conflict(fmt.Sprintf("VM: %s already exist.", vc.vmWithSpec.Name), fmt.Errorf("VM %s already exist", vc.vmWithSpec.Name))
 	}
 	return vc
 }
@@ -231,7 +225,7 @@ func (vc *vagrantCli) remove() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
 	}
-	beego.Debug("Removing VM with VID: %s", vc.vmWithSpec.Spec.VID)
+	beego.Debug(fmt.Sprintf("Removing VM with VID: %s", vc.vmWithSpec.Spec.VID))
 	err := services.NewVMHandler().DeleteVMByVID(vc.vmWithSpec.Spec.VID)
 	if err != nil {
 		vc.err.InternalError(err)
@@ -259,11 +253,11 @@ func (vc *vagrantCli) CreateByVagrantfile() error {
 	vc.newSSHClient().
 		checkDirs().
 		copySources().
-		transferPackages().
 		resolveVagrantfile().
 		executeCommand(fmt.Sprintf("cd %s && %s up", vc.workPath, vagrantCommand)).
 		updateVID().
 		record()
+
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to create VM with Vagrant: %+v", vc.err))
 		return vc.err
@@ -281,7 +275,10 @@ func (vc *vagrantCli) Halt() error {
 }
 
 func (vc *vagrantCli) Destroy() error {
-	vc.loadSpec().newSSHClient().executeCommand(fmt.Sprintf("%s destroy -f %s && rm -rf %s", vagrantCommand, vc.vmWithSpec.Spec.VID, vc.workPath)).remove()
+	vc.loadSpec().newSSHClient().executeCommand(
+		fmt.Sprintf("%s destroy -f %s && rm -rf %s && rm -f %s",
+			vagrantCommand, vc.vmWithSpec.Spec.VID, vc.workPath,
+			path.Join(vc.outputPath, vc.vmWithSpec.Name+".box"))).remove()
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to destroy VM with error: %+v", vc.err))
 		return vc.err

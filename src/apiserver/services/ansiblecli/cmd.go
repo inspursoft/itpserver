@@ -80,7 +80,11 @@ func (ac *ansibleCli) transferPackage() *ansibleCli {
 		return ac
 	}
 	uploadSourcePath := filepath.Join(ac.uploadPath)
-	err := ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
+	err := ac.sshClient.CheckDir(uploadSourcePath)
+	if err != nil {
+		ac.err.InternalError(err)
+	}
+	err = ac.sshClient.SecureCopy(uploadSourcePath, ac.workPath)
 	if err != nil {
 		ac.err.InternalError(err)
 	}
@@ -91,8 +95,12 @@ func (ac *ansibleCli) unzipPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
+	err := ac.sshClient.RemoveDir(filepath.Join(ac.workPath, ac.pkg.Name+ac.pkg.Tag))
+	if err != nil {
+		ac.err.InternalError(err)
+	}
 	ac.pkg.SourceName = ac.pkg.Name + ac.pkg.Tag + ".zip"
-	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && unzip %s", ac.workPath, ac.pkg.SourceName))
+	err = ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && unzip %s", ac.workPath, ac.pkg.SourceName))
 	if err != nil {
 		ac.err.InternalError(err)
 	}

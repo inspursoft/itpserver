@@ -17,10 +17,14 @@ services:
       dockerfile: ./containers/apiserver/Dockerfile
     restart: always
     depends_on:
-      - postgredb     
+      - postgredb
+    ports:
+      - "8088:8088"     
     volumes:
-      - ../conf/apiserver/app.conf:/go/bin/conf/app.conf
-      - ../docs/swagger.yml:/go/bin/swagger/swagger.yml
+      - /root/itp/ansible-cil:/root/itp/ansible-cli
+      - /root/itp/vagrant-sources:/root/itp/vagrant-sources
+      - /root/itp/vagrant-vms:/root/itp/vagrant-vms
+      - /root/itp/vagrant-output:/root/itp/vagrant-output
     networks:
       - itp
   proxy:

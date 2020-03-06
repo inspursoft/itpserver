@@ -7,6 +7,24 @@ import (
 
 func init() {
 
+    beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"],
+        beego.ControllerComments{
+            Method: "Download",
+            Router: `/download`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:ArchiveController"],
+        beego.ControllerComments{
+            Method: "Upload",
+            Router: `/upload`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:AuthController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:AuthController"],
         beego.ControllerComments{
             Method: "Get",
@@ -61,6 +79,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:OneStepController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:OneStepController"],
+        beego.ControllerComments{
+            Method: "PostWithVagrantfile",
+            Router: `/:vm_name`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"],
         beego.ControllerComments{
             Method: "Get",
@@ -99,8 +126,17 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:VMController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:VMController"],
         beego.ControllerComments{
-            Method: "Post",
+            Method: "CreateBySpec",
             Router: `/`,
+            AllowHTTPMethods: []string{"post"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:VMController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:VMController"],
+        beego.ControllerComments{
+            Method: "CreateByVagrantfile",
+            Router: `/:vm_name`,
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -111,6 +147,15 @@ func init() {
             Method: "Delete",
             Router: `/:vm_name`,
             AllowHTTPMethods: []string{"delete"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:VMController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:VMController"],
+        beego.ControllerComments{
+            Method: "Package",
+            Router: `/:vm_name/package`,
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

@@ -87,7 +87,10 @@ func (bc *BaseController) loadRequestBody(target interface{}) {
 func (bc *BaseController) handleError(err error) {
 	if err != nil {
 		if e, ok := err.(*models.ITPError); ok {
-			if e.Status() > 400 {
+			if e.HasNoError() {
+				return
+			}
+			if e.Status() >= 400 {
 				fmt.Printf("%+v\n", e)
 				bc.CustomAbort(e.Status(), e.Error())
 			}
@@ -126,6 +129,7 @@ func (bc *BaseController) proxiedRequest(method string, requestData interface{},
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	io.Copy(bc.Ctx.ResponseWriter, resp.Body)
+	bc.serveStatus(resp.StatusCode, "Finished handled proxied request.")
 }
 
 // @Title Get
