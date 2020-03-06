@@ -6,6 +6,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/astaxie/beego/logs"
+
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 
 	"github.com/astaxie/beego"
@@ -97,6 +99,17 @@ func (ac *ansibleCli) unzipPackage() *ansibleCli {
 	return ac
 }
 
+func (ac *ansibleCli) preExecution() *ansibleCli {
+	if !ac.err.HasNoError() {
+		return ac
+	}
+	err := ac.sshClient.ExecuteCommand("prepare.sh")
+	if err != nil {
+		logs.Warning("No prepare.sh found while doing pre execution.")
+	}
+	return ac
+}
+
 func (ac *ansibleCli) generateInstall() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
@@ -181,6 +194,7 @@ func (ac *ansibleCli) Transfer() error {
 	ac.init().
 		transferPackage().
 		unzipPackage().
+		preExecution().
 		generateInstall().
 		generateHosts().
 		recordPackage()
