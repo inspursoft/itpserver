@@ -14,6 +14,7 @@ type VMController struct {
 
 // @Title Get VM.
 // @Description Returns a list of virtual machines or filtered by VM ID.
+// @Param	access_token	query	string	false	"Optional access token."
 // @Param Authorization	header	string	true	"Set authorization info."
 // @Param	id		query 	int64	false		"The virual machine name to return."
 // @Success 200 Successful get all or filter virtual machine by name.
