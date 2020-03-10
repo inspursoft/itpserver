@@ -283,7 +283,7 @@ func (vc *vagrantCli) Destroy() error {
 	cli.executeCommand(fmt.Sprintf("%s destroy -f %s", vagrantCommand, vc.vmWithSpec.Spec.VID), true)
 	cli.executeCommand(fmt.Sprintf("rm -rf %s ", vc.workPath), true)
 	cli.executeCommand(fmt.Sprintf("rm -f %s", path.Join(vc.outputPath, vc.vmWithSpec.Name+".box")), true)
-	cli.executeCommand(fmt.Sprintf("sed /%s/d $HOME/.ssh/known_hosts", vc.vmWithSpec.IP), true)
+	cli.executeCommand(fmt.Sprintf("sed /%s/d ~/.ssh/known_hosts", vc.vmWithSpec.IP), true)
 	cli.remove()
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to destroy VM with error: %+v", vc.err))
