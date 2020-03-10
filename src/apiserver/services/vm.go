@@ -27,7 +27,7 @@ func (vc *vmConf) getByField(value interface{}, field string) (vm *models.VM, er
 	if val, ok := value.(int64); ok {
 		query.ID = val
 	}
-	vm, err = vc.daoHandler.GetVM(query, field)
+	vm, err = vc.daoHandler.GetVM(query, "IP", "Name", "OS")
 	if err != nil {
 		return nil, vc.e
 	}
