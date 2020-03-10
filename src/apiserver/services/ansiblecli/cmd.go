@@ -70,6 +70,17 @@ func (ac *ansibleCli) init() *ansibleCli {
 	return ac
 }
 
+func (ac *ansibleCli) cleanUp() *ansibleCli {
+	if !ac.err.HasNoError() {
+		return ac
+	}
+	err := ac.sshClient.RemoveDir(filepath.Join(ac.workPath))
+	if err != nil {
+		ac.err.InternalError(err)
+	}
+	return ac
+}
+
 func (ac *ansibleCli) transferPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
@@ -79,7 +90,7 @@ func (ac *ansibleCli) transferPackage() *ansibleCli {
 		ac.err.Notfound("VM", fmt.Errorf("VM name is required"))
 		return ac
 	}
-	uploadSourcePath := filepath.Join(ac.uploadPath)
+	uploadSourcePath := filepath.Join(ac.uploadPath, vmName)
 	err := ac.sshClient.CheckDir(uploadSourcePath)
 	if err != nil {
 		ac.err.InternalError(err)
@@ -95,12 +106,8 @@ func (ac *ansibleCli) unzipPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
-	err := ac.sshClient.RemoveDir(filepath.Join(ac.workPath, ac.pkg.Name+ac.pkg.Tag))
-	if err != nil {
-		ac.err.InternalError(err)
-	}
 	ac.pkg.SourceName = ac.pkg.Name + ac.pkg.Tag + ".zip"
-	err = ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && unzip %s", ac.workPath, ac.pkg.SourceName))
+	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && unzip %s", ac.workPath, ac.pkg.SourceName))
 	if err != nil {
 		ac.err.InternalError(err)
 	}
@@ -201,6 +208,7 @@ func (ac *ansibleCli) recordInstall() *ansibleCli {
 
 func (ac *ansibleCli) Transfer() error {
 	ac.init().
+		cleanUp().
 		transferPackage().
 		unzipPackage().
 		preExecution().
@@ -217,6 +225,7 @@ func (ac *ansibleCli) Transfer() error {
 func (ac *ansibleCli) TransferWithoutGenerateConfig() error {
 	beego.Debug("Start transfering without generating configures...")
 	ac.init().
+		cleanUp().
 		transferPackage().
 		unzipPackage().
 		preExecution().
