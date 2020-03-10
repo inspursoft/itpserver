@@ -74,7 +74,8 @@ func (ac *ansibleCli) cleanUp() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
-	err := ac.sshClient.RemoveDir(filepath.Join(ac.workPath))
+	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s", ac.workPath))
+	err = ac.sshClient.RemoveDir("*")
 	if err != nil {
 		ac.err.InternalError(err)
 	}
