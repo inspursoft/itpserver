@@ -70,18 +70,6 @@ func (ac *ansibleCli) init() *ansibleCli {
 	return ac
 }
 
-func (ac *ansibleCli) cleanUp() *ansibleCli {
-	if !ac.err.HasNoError() {
-		return ac
-	}
-	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s", ac.workPath))
-	err = ac.sshClient.RemoveDir("*")
-	if err != nil {
-		ac.err.InternalError(err)
-	}
-	return ac
-}
-
 func (ac *ansibleCli) transferPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
@@ -209,7 +197,6 @@ func (ac *ansibleCli) recordInstall() *ansibleCli {
 
 func (ac *ansibleCli) Transfer() error {
 	ac.init().
-		cleanUp().
 		transferPackage().
 		unzipPackage().
 		preExecution().
@@ -226,7 +213,6 @@ func (ac *ansibleCli) Transfer() error {
 func (ac *ansibleCli) TransferWithoutGenerateConfig() error {
 	beego.Debug("Start transfering without generating configures...")
 	ac.init().
-		cleanUp().
 		transferPackage().
 		unzipPackage().
 		preExecution().
