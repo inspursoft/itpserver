@@ -103,6 +103,9 @@ func (s *SecureShell) SecureCopy(filePath string, destinationPath string) error 
 		if err != nil {
 			return err
 		}
+		if info == nil {
+			return fmt.Errorf("from path: %s does not exist", path)
+		}
 		if info.IsDir() {
 			log.Printf("From path: %s to path: %s\n", path, destinationPath)
 			return nil
