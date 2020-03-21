@@ -116,7 +116,7 @@ func (vc *vagrantCli) changeScriptByOS() *vagrantCli {
 	} else if strings.Index(os, "centos") >= 0 {
 		specificOS = "centos"
 	} else {
-		vc.err.Notfound(fmt.Sprintf("Script with OS: %s", os), err)
+		vc.err.Notfound(fmt.Sprintf("Script with OS: %s", os), fmt.Errorf("script with OS: %s does not exist"))
 		return vc
 	}
 	beego.Debug(fmt.Sprintf("Changing script suffix by OS: %s", specificOS))
