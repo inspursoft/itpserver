@@ -104,6 +104,29 @@ func (vc *vagrantCli) copySources() *vagrantCli {
 	return vc
 }
 
+func (vc *vagrantCli) changeScriptByOS() *vagrantCli {
+	if !vc.err.HasNoError() {
+		return vc
+	}
+	os := vc.vmWithSpec.OS
+	beego.Debug(fmt.Sprintf("Current base OS is: %s", os))
+	var specificOS string
+	if strings.Index(os, "ubuntu") >= 0 {
+		specificOS = "ubuntu"
+	} else if strings.Index(os, "centos") >= 0 {
+		specificOS = "centos"
+	} else {
+		vc.err.Notfound(fmt.Sprintf("Script with OS: %s", os), err)
+		return vc
+	}
+	beego.Debug(fmt.Sprintf("Changing script suffix by OS: %s", specificOS))
+	err := vc.sshClient.ExecuteCommand(fmt.Sprintf("mv %s/password.sh.%s %s/password.sh", vc.workPath, specificOS))
+	if err != nil {
+		vc.err.InternalError(err)
+	}
+	return vc
+}
+
 func (vc *vagrantCli) generateConfig() *vagrantCli {
 	if !vc.err.HasNoError() {
 		return vc
@@ -243,6 +266,7 @@ func (vc *vagrantCli) Create() error {
 		init().
 		checkDirs().
 		copySources().
+		changeScriptByOS().
 		generateConfig().
 		executeCommand(fmt.Sprintf("cd %s && %s up && PATH=/bin:$PATH sh ssh.sh %s", vc.workPath, vagrantCommand, vc.vmWithSpec.IP)).
 		updateVID().
