@@ -17,16 +17,16 @@ type InstallationController struct {
 // @Description Get virtual machines with software packages installed.
 // @Param	access_token	query	string	false	"Optional access token."
 // @Param Authorization	header	string	false	"Set authorization info."
-// @Param	vm_name		query 	string	true		"The virtual machine ID which installed software packages."
+// @Param	vm_name		path 	string	true		"The virtual machine ID which installed software packages."
 // @Success 200 Successful get virtual machines with software package installed.
 // @Failure 400 Bad request.
 // @Failure 401 Unauthorized.
 // @Failure 403 The resouce specified was forbidden to access.
 // @Failure 404 The resource specified was not found.
 // @Failure 500 Internal error occurred at server side.
-// @router / [get]
+// @router /:vm_name [get]
 func (ic *InstallationController) Get() {
-	vmName := ic.requiredParam("vm_name")
+	vmName := ic.requiredParam(":vm_name")
 	vm, err := services.NewVMHandler().GetByName(vmName)
 	ic.handleError(err)
 	if vm == nil {

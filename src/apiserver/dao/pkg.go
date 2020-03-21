@@ -10,10 +10,10 @@ import (
 
 type PkgDaoHandler int
 
-func (p *PkgDaoHandler) GetPackage(name, tag string) (*models.Package, error) {
+func (p *PkgDaoHandler) GetPackage(vmName string, name string, tag string) (*models.Package, error) {
 	o := orm.NewOrm()
-	pkg := models.Package{Name: name, Tag: tag}
-	err := o.Read(&pkg, "Name", "Tag")
+	pkg := models.Package{Name: name, Tag: tag, VMName: vmName}
+	err := o.Read(&pkg, "Name", "Tag", "VMName")
 	if err != nil {
 		if err == orm.ErrNoRows {
 			return nil, nil
@@ -23,9 +23,10 @@ func (p *PkgDaoHandler) GetPackage(name, tag string) (*models.Package, error) {
 	return &pkg, nil
 }
 
-func (p *PkgDaoHandler) GetPackageList(name, tag string) ([]*models.Package, error) {
+func (p *PkgDaoHandler) GetPackageList(vmName string, name string, tag string) ([]*models.Package, error) {
 	o := orm.NewOrm()
 	q := o.QueryTable("package")
+	q = q.Filter("VMName", vmName)
 	if name != "" {
 		q = q.Filter("name", name)
 	}
@@ -52,9 +53,9 @@ func (p *PkgDaoHandler) AddPackage(pkg *models.Package) (insertedID int64, err e
 	return
 }
 
-func (p *PkgDaoHandler) DeletePackage(name string, tag string) (affected int64, err error) {
+func (p *PkgDaoHandler) DeletePackage(vmName string, name string, tag string) (affected int64, err error) {
 	o := orm.NewOrm()
-	affected, err = o.QueryTable("package").Filter("name__exact", name).Filter("tag__exact", tag).Delete()
+	affected, err = o.QueryTable("package").Filter("vm_name___exact", vmName).Filter("name__exact", name).Filter("tag__exact", tag).Delete()
 	if err != nil {
 		if err == orm.ErrNoRows {
 			return 0, nil

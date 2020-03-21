@@ -56,6 +56,7 @@ func (v *VMController) CreateBySpec() {
 	v.loadRequestBody(&vmWithSpec)
 	err := vagrantcli.NewClient(vmWithSpec, v.Ctx.ResponseWriter).Create()
 	v.handleError(err)
+	v.StopRun()
 }
 
 // @Title Create VM by Vagrantfile.
