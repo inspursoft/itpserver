@@ -120,7 +120,7 @@ func (vc *vagrantCli) changeScriptByOS() *vagrantCli {
 		return vc
 	}
 	beego.Debug(fmt.Sprintf("Changing script suffix by OS: %s", specificOS))
-	err := vc.sshClient.ExecuteCommand(fmt.Sprintf("mv %s/password.sh.%s %s/password.sh", vc.workPath, vc.workPath, specificOS))
+	err := vc.sshClient.ExecuteCommand(fmt.Sprintf("mv %s/password.sh.%s %s/password.sh", vc.workPath, specificOS, vc.workPath))
 	if err != nil {
 		vc.err.InternalError(err)
 	}
