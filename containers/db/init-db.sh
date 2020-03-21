@@ -21,7 +21,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
   create table package (
     id serial primary key,
     pkg_name varchar(50) not null,
-    pkg_tag varchar(20) not null
+    pkg_tag varchar(20) not null,
+    vm_name varchar(50) not null
   );
   create table installation (
     id serial primary key,
