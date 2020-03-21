@@ -8,11 +8,6 @@ import (
 
 type OneStepController struct {
 	BaseController
-	simpleOptAuth []string
-}
-
-func (ic *OneStepController) Prepare() {
-	ic.simpleOptAuth = []string{"access_token", ic.GetString("access_token", "")}
 }
 
 // @Title Post
@@ -30,9 +25,9 @@ func (ic *OneStepController) Prepare() {
 func (ic *OneStepController) Post() {
 	var oneStep models.OneStepInstallation
 	ic.loadRequestBody(&oneStep)
-	ic.proxiedRequest(http.MethodPost, oneStep.VMWithSpec, "VMController.CreateBySpec", ic.simpleOptAuth)
-	ic.proxiedRequest(http.MethodPost, oneStep.PackageVO, "InstallationController.Post", ":vm_name", oneStep.VMWithSpec.Name, ic.simpleOptAuth)
-	ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", oneStep.VMWithSpec.Name, ic.simpleOptAuth)
+	ic.proxiedRequest(http.MethodPost, oneStep.VMWithSpec, "VMController.CreateBySpec", "access_token", ic.GetString("access_token", ""))
+	ic.proxiedRequest(http.MethodPost, oneStep.PackageVO, "InstallationController.Post", ":vm_name", oneStep.VMWithSpec.Name, "access_token", ic.GetString("access_token", ""))
+	ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", oneStep.VMWithSpec.Name, "access_token", ic.GetString("access_token", ""))
 }
 
 // @Title Post
@@ -49,6 +44,6 @@ func (ic *OneStepController) Post() {
 // @router /:vm_name [post]
 func (ic *OneStepController) PostWithVagrantfile() {
 	vmName := ic.requiredParam(":vm_name")
-	ic.proxiedRequest(http.MethodPost, nil, "VMController.CreateByVagrantfile", ":vm_name", vmName, ic.simpleOptAuth)
-	ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, ic.simpleOptAuth)
+	ic.proxiedRequest(http.MethodPost, nil, "VMController.CreateByVagrantfile", ":vm_name", vmName, "access_token", ic.GetString("access_token", ""))
+	ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ic.GetString("access_token", ""))
 }
