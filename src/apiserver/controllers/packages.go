@@ -106,7 +106,7 @@ func (pc *PackagesController) Upload() {
 			pc.handleError(err)
 		}
 	}
-	pkg := models.PackageVO{Name: utils.FileNameWithoutExt(sourceName), SourceName: sourceName}
+	pkg := models.PackageVO{VMName: vmName, Name: utils.FileNameWithoutExt(sourceName), SourceName: sourceName}
 	handler := services.NewPackageHandler()
 	handler.Create(pkg)
 }
