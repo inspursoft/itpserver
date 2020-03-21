@@ -37,7 +37,7 @@ func (ic *installationConf) getSpecifiedVMPackage(ID int64, pkgName, pkgTag stri
 		ic.e.Notfound("VM", fmt.Errorf("No VM was found with ID: %d", ID))
 		return nil, nil, ic.e
 	}
-	pkg, err = ic.daoPkgHandler.GetPackage(pkgName, pkgTag, vm.Name)
+	pkg, err = ic.daoPkgHandler.GetPackage(vm.Name, pkgName, pkgTag)
 	if err != nil {
 		ic.e.InternalError(err)
 		return nil, nil, ic.e
