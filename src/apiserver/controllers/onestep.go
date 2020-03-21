@@ -13,10 +13,7 @@ type OneStepController struct {
 }
 
 func (ic *OneStepController) Prepare() {
-	accessToken := ic.GetString("access_token", "")
-	if len(strings.TrimSpace(accessToken)) > 0 {
-		ic.simpleOptAuth = []string{"access_token", accessToken}
-	}
+	ic.simpleOptAuth = []string{"access_token", ic.GetString("access_token", "")}
 }
 
 // @Title Post
