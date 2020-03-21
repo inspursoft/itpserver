@@ -46,7 +46,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:InstallationController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:InstallationController"],
         beego.ControllerComments{
             Method: "Get",
-            Router: `/`,
+            Router: `/:vm_name`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -91,7 +91,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"],
         beego.ControllerComments{
             Method: "Get",
-            Router: `/`,
+            Router: `/:vm_name`,
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -100,7 +100,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"],
         beego.ControllerComments{
             Method: "Upload",
-            Router: `/`,
+            Router: `/:vm_name`,
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -109,7 +109,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"] = append(beego.GlobalControllerRouter["github.com/inspursoft/itpserver/src/apiserver/controllers:PackagesController"],
         beego.ControllerComments{
             Method: "Delete",
-            Router: `/`,
+            Router: `/:vm_name`,
             AllowHTTPMethods: []string{"delete"},
             MethodParams: param.Make(),
             Filters: nil,
