@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
