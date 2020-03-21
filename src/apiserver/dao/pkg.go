@@ -55,7 +55,7 @@ func (p *PkgDaoHandler) AddPackage(pkg *models.Package) (insertedID int64, err e
 
 func (p *PkgDaoHandler) DeletePackage(vmName string, name string, tag string) (affected int64, err error) {
 	o := orm.NewOrm()
-	affected, err = o.QueryTable("package").Filter("vm_name___exact", vmName).Filter("name__exact", name).Filter("tag__exact", tag).Delete()
+	affected, err = o.QueryTable("package").Filter("vm_name__exact", vmName).Filter("name__exact", name).Filter("tag__exact", tag).Delete()
 	if err != nil {
 		if err == orm.ErrNoRows {
 			return 0, nil
