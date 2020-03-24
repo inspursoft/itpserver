@@ -41,7 +41,10 @@ func (ac *ArchiveController) Upload() {
 	if len(strings.TrimSpace(principle)) == 0 {
 		ac.CustomAbort(http.StatusBadGateway, "Principle is required.")
 	}
-
+	err = services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
+	if err != nil {
+		ac.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Failed to SCP under Cross Host mode: %+v", err))
+	}
 	err = services.UploadArtifacts(vmName, repoName, principle, ac.Ctx.ResponseWriter)
 	if err != nil {
 		ac.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Failed to upload artifacts: %+v", err))
@@ -68,5 +71,6 @@ func (ac *ArchiveController) Download() {
 		ac.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM with name: %s does not exist.", vmName))
 	}
 	ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
+	services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
 	ac.Ctx.Output.Download(services.ResolveBoxFilePath(vmName))
 }

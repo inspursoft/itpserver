@@ -48,28 +48,31 @@ func RetrieveVMFiles(vmName string) ([]string, *models.ITPError) {
 }
 
 func ResolveBoxFilePath(vmName string) string {
-	boxFilePath := filepath.Join(outputPath, vmName+".box")
+	boxFilePath := filepath.Join(outputPath, vmName, vmName+".box")
 	beego.Debug(fmt.Sprintf("Get VM box download file path: %s", boxFilePath))
 	return boxFilePath
 }
 
+func SCPArtifacts(vmName string, output io.Writer) error {
+	if hostMode {
+		beego.Debug("SCP only support Cross host mode ...")
+		return nil
+	}
+	beego.Debug(fmt.Sprintf("SCP artifacts for VM: %s across the host...", vmName))
+	_, err := utils.CheckDirs(outputPath)
+	if err != nil {
+		return err
+	}
+	sshClient, err := utils.NewSecureShell(output)
+	if err != nil {
+		return err
+	}
+	err = sshClient.HostSCP(ResolveBoxFilePath(vmName), outputPath, true)
+	return err
+}
+
 func UploadArtifacts(vmName, repoName, principle string, output io.Writer) error {
 	boxFilepath := ResolveBoxFilePath(vmName)
-	if !hostMode {
-		beego.Debug("Running under Cross host mode ...")
-		_, err := utils.CheckDirs(outputPath)
-		if err != nil {
-			return err
-		}
-		sshClient, err := utils.NewSecureShell(output)
-		if err != nil {
-			return err
-		}
-		err = sshClient.HostSCP(boxFilepath, outputPath, true)
-		if err != nil {
-			return err
-		}
-	}
 	file, err := os.Open(boxFilepath)
 	if err != nil {
 		return err
