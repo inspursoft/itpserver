@@ -48,7 +48,7 @@ func RetrieveVMFiles(vmName string) ([]string, *models.ITPError) {
 }
 
 func ResolveBoxFilePath(vmName string) string {
-	boxFilePath := filepath.Join(outputPath, vmName, vmName+".box")
+	boxFilePath := filepath.Join(outputPath, vmName+".box")
 	beego.Debug(fmt.Sprintf("Get VM box download file path: %s", boxFilePath))
 	return boxFilePath
 }
