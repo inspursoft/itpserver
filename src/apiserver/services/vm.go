@@ -114,7 +114,7 @@ func (vc *vmConf) UpdateVMID(ID int64, VID string) error {
 
 func (vc *vmConf) UpdateVMPackageStatus(vmName string, status models.VMPackageStatus) error {
 	beego.Debug(fmt.Sprintf("Updating VM: %s package status to: %v", vmName, status))
-	updates := map[string]interface{}{"VMPackageStatus": status}
+	updates := map[string]interface{}{"PackageStatus": status}
 	_, err := vc.daoHandler.UpdateVMByName(vmName, updates)
 	if err != nil {
 		vc.e.InternalError(err)
