@@ -7,7 +7,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     id serial primary key,
     vm_ip varchar(50) not null,
     vm_name varchar(50) not null,
-    vm_os varchar(20) not null
+    vm_os varchar(20) not null,
+    vm_package_status integer not null default 0
   );
   create table vm_spec (
     id serial primary key,

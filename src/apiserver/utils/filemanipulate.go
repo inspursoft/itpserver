@@ -21,3 +21,10 @@ func CheckFileExt(fileName string, ext string) bool {
 func FileNameWithoutExt(fileName string) string {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }
+
+func FileExists(fullFilePath string) (exists bool) {
+	if _, err := os.Stat(fullFilePath); os.IsExist(err) {
+		exists = true
+	}
+	return
+}

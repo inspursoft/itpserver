@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/astaxie/beego"
+	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
 
@@ -65,12 +67,26 @@ func (ac *ArchiveController) Upload() {
 // @router /download [get]
 func (ac *ArchiveController) Download() {
 	vmName := ac.GetString("vm_name")
-	vm, err := services.NewVMHandler().GetByName(vmName)
+	vmHandler := services.NewVMHandler()
+	vm, err := vmHandler.GetByName(vmName)
 	ac.handleError(err)
 	if vm == nil {
 		ac.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM with name: %s does not exist.", vmName))
 	}
-	ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
-	services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
-	ac.Ctx.Output.Download(services.ResolveBoxFilePath(vmName))
+	switch vm.PackageStatus {
+	case models.Pending:
+		ac.serveStatus(http.StatusOK, fmt.Sprintf("VM: %s is packing in progress, please wait.", vmName))
+	case models.Initial:
+		beego.Debug(fmt.Sprintf("Start packing VM: %s as box.", vmName))
+		go func() {
+			vmHandler.UpdateVMPackageStatus(vmName, models.Pending)
+			ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
+			services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
+			vmHandler.UpdateVMPackageStatus(vmName, models.Finished)
+		}()
+	case models.Finished:
+		ac.serveStatus(http.StatusOK, fmt.Sprintf("VM: %s has finished to package and it is ready to download.", vmName))
+		ac.Ctx.Output.Download(services.ResolveBoxFilePath(vmName))
+		vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
+	}
 }

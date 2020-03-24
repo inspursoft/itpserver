@@ -1,6 +1,9 @@
 package services
 
 import (
+	"fmt"
+
+	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/dao"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 )
@@ -103,6 +106,16 @@ func (vc *vmConf) Create(vmWithSpec models.VMWithSpec) error {
 func (vc *vmConf) UpdateVMID(ID int64, VID string) error {
 	updates := map[string]interface{}{"VID": VID}
 	_, err := vc.daoHandler.UpdateVMSpec(ID, updates)
+	if err != nil {
+		vc.e.InternalError(err)
+	}
+	return vc.e
+}
+
+func (vc *vmConf) UpdateVMPackageStatus(vmName string, status models.VMPackageStatus) error {
+	beego.Debug(fmt.Sprintf("Updating VM: %s package status to: %v", vmName, status))
+	updates := map[string]interface{}{"VMPackageStatus": status}
+	_, err := vc.daoHandler.UpdateVMByName(vmName, updates)
 	if err != nil {
 		vc.e.InternalError(err)
 	}

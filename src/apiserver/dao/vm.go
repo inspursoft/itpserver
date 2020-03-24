@@ -77,7 +77,20 @@ func (v *VMDaoHandler) UpdateVM(ID int64, updates map[string]interface{}) (affec
 		}
 		return
 	}
-	beego.Info(fmt.Sprintf("Successful update VM ID: %d item(s) with updates: %+v", ID, updates))
+	beego.Info(fmt.Sprintf("Successful update VM ID: %d with updates: %+v", ID, updates))
+	return
+}
+
+func (v *VMDaoHandler) UpdateVMByName(vmName string, updates map[string]interface{}) (affected int64, err error) {
+	o := orm.NewOrm()
+	affected, err = o.QueryTable("vm").Filter("Name", vmName).Update(orm.Params(updates))
+	if err != nil {
+		if err == orm.ErrNoRows {
+			return 0, nil
+		}
+		return
+	}
+	beego.Info(fmt.Sprintf("Successful update VM Name: %s with updates: %+v", vmName, updates))
 	return
 }
 

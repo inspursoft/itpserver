@@ -1,12 +1,21 @@
 package models
 
+type VMPackageStatus int
+
+const (
+	Initial VMPackageStatus = iota
+	Pending
+	Finished
+)
+
 type VM struct {
-	ID       int64      `json:"id" orm:"column(id);auto;pk"`
-	IP       string     `json:"vm_ip" orm:"column(vm_ip)"`
-	Name     string     `json:"vm_name" orm:"column(vm_name)"`
-	OS       string     `json:"vm_os" orm:"column(vm_os)"`
-	Spec     *VMSpec    `json:"vm_spec" orm:"reverse(one);on_delete(cascade)"`
-	Packages []*Package `json:"-" orm:"rel(m2m);rel_through(github.com/inspursoft/itpserver/src/apiserver/models.Installation)"`
+	ID            int64           `json:"id" orm:"column(id);auto;pk"`
+	IP            string          `json:"vm_ip" orm:"column(vm_ip)"`
+	Name          string          `json:"vm_name" orm:"column(vm_name)"`
+	OS            string          `json:"vm_os" orm:"column(vm_os)"`
+	Spec          *VMSpec         `json:"vm_spec" orm:"reverse(one);on_delete(cascade)"`
+	PackageStatus VMPackageStatus `json:"vm_package_status" orm:"column(vm_package_status)"`
+	Packages      []*Package      `json:"-" orm:"rel(m2m);rel_through(github.com/inspursoft/itpserver/src/apiserver/models.Installation)"`
 }
 
 func (vm *VM) TableName() string {
