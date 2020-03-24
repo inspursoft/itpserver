@@ -327,7 +327,8 @@ func (vc *vagrantCli) GlobalStatus() error {
 }
 
 func (vc *vagrantCli) Package() error {
-	vc.loadSpec().newSSHClient().updateVID().executeCommand(fmt.Sprintf("%s package %s --output %s", vagrantCommand, vc.vmWithSpec.Spec.VID, filepath.Join(vc.outputPath, fmt.Sprintf("%s.box", vc.vmWithSpec.Name))))
+	vmBoxFileName := filepath.Join(vc.outputPath, fmt.Sprintf("%s.box", vc.vmWithSpec.Name))
+	vc.loadSpec().newSSHClient().updateVID().executeCommand(fmt.Sprintf("rm -f %s && %s package %s --output %s", vmBoxFileName, vagrantCommand, vc.vmWithSpec.Spec.VID, vmBoxFileName))
 	if !vc.err.HasNoError() && vc.err != nil {
 		beego.Error(fmt.Sprintf("Failed to package VM with error: %+v", vc.err))
 		return vc.err

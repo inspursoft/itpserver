@@ -67,5 +67,6 @@ func (ac *ArchiveController) Download() {
 	if vm == nil {
 		ac.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM with name: %s does not exist.", vmName))
 	}
+	ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
 	ac.Ctx.Output.Download(services.ResolveBoxFilePath(vmName))
 }
