@@ -145,10 +145,7 @@ func (bc *BaseController) proxiedRequest(method string, requestData interface{},
 	}
 	beego.Debug("Finished to handle proxied request.")
 	if resp != nil {
-		_, err = io.Copy(bc.Ctx.ResponseWriter, resp.Body)
-		if err != nil {
-			return err
-		}
+		io.Copy(bc.Ctx.ResponseWriter, resp.Body)
 		bc.serveStatus(resp.StatusCode, "Finished handled proxied request.")
 	}
 	return nil
