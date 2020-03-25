@@ -87,12 +87,12 @@ func (ac *ArchiveController) Download() {
 			err := ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
 			if err != nil {
 				vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
-				ac.handleError(err)
+				// ac.handleError(err)
 			}
 			err = services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
 			if err != nil {
 				vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
-				ac.handleError(err)
+				// ac.handleError(err)
 			}
 			vmHandler.UpdateVMPackageStatus(vmName, models.Finished)
 		}()
