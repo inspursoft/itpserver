@@ -85,8 +85,8 @@ func (ac *ArchiveController) Download() {
 			vmHandler.UpdateVMPackageStatus(vmName, models.Finished)
 		}()
 	case models.Finished:
-		ac.serveStatus(http.StatusOK, fmt.Sprintf("VM: %s has finished to package and it is ready to download.", vmName))
 		ac.Ctx.Output.Download(services.ResolveBoxFilePath(vmName))
 		vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
+		ac.serveStatus(http.StatusOK, fmt.Sprintf("VM: %s has finished to package and it is ready to download.", vmName))
 	}
 }
