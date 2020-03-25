@@ -53,6 +53,13 @@ func ResolveBoxFilePath(vmName string) string {
 	return boxFilePath
 }
 
+func CheckVMBoxExists(vmName string) (exist bool) {
+	if utils.FileExists(ResolveBoxFilePath(vmName)) {
+		exist = true
+	}
+	return
+}
+
 func SCPArtifacts(vmName string, output io.Writer) error {
 	if hostMode {
 		beego.Debug("SCP only support Cross host mode ...")

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
@@ -34,6 +35,10 @@ func (ac *ArchiveController) Upload() {
 	if vm == nil {
 		ac.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM with name: %s does not exist.", vmName))
 	}
+	if !services.CheckVMBoxExists(vmName) {
+		ac.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM with name: %s box file does not exist, please package it first.", vmName))
+	}
+
 	repoName := ac.GetString("repo_name")
 	if len(strings.TrimSpace(repoName)) == 0 {
 		ac.CustomAbort(http.StatusBadRequest, "Repo name is required.")
@@ -42,18 +47,10 @@ func (ac *ArchiveController) Upload() {
 	if len(strings.TrimSpace(principle)) == 0 {
 		ac.CustomAbort(http.StatusBadGateway, "Principle is required.")
 	}
-	err = services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
-	if err != nil {
-		ac.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Failed to SCP under Cross Host mode: %+v", err))
-	}
 	err = services.UploadArtifacts(vmName, repoName, principle, ac.Ctx.ResponseWriter)
 	if err != nil {
 		ac.CustomAbort(http.StatusInternalServerError, fmt.Sprintf("Failed to upload artifacts: %+v", err))
 	}
-}
-
-func resetVMPackageStatus() {
-
 }
 
 // @Title Download archive
@@ -85,13 +82,13 @@ func (ac *ArchiveController) Download() {
 			vmHandler.UpdateVMPackageStatus(vmName, models.Pending)
 			err := ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
 			if err != nil {
+				beego.Error(fmt.Sprintf("Error occurred when proxied requesting package: %+v, will reset initial status.", err))
 				vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
-				// ac.handleError(err)
 			}
 			err = services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
 			if err != nil {
+				beego.Error(fmt.Sprintf("Error occurred when SCP package: %+v, will reset initial status.", err))
 				vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
-				// ac.handleError(err)
 			}
 			vmHandler.UpdateVMPackageStatus(vmName, models.Finished)
 		}()
