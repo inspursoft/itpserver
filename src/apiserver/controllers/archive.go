@@ -101,3 +101,27 @@ func (ac *ArchiveController) Download() {
 		ac.serveStatus(http.StatusOK, fmt.Sprintf("VM: %s has finished to package and it is ready to download.", vmName))
 	}
 }
+
+// @Title Reset VM download packaging status manually
+// @Description Reset VM download packaging statue manually from ITP service.
+// @Param	access_token	query	string	false	"Optional access token."
+// @Param Authorization	header	string	false	"Set authorization info."
+// @Param	vm_name	query 	string	true		"VM name."
+// @Success 200 Successful Reset VM download packaged VM box status from ITP service.
+// @Failure 400 Bad request.
+// @Failure 401 Unauthorized.
+// @Failure 403 The resouce specified was forbidden to access.
+// @Failure 404 The resource specified was not found.
+// @Failure 500 Internal error occurred at server side.
+// @router /download/reset [get]
+func (ac *ArchiveController) Reset() {
+	vmName := ac.GetString("vm_name")
+	vmHandler := services.NewVMHandler()
+	vm, err := vmHandler.GetByName(vmName)
+	ac.handleError(err)
+	if vm == nil {
+		ac.CustomAbort(http.StatusNotFound, fmt.Sprintf("VM with name: %s does not exist.", vmName))
+	}
+	vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
+	ac.serveStatus(http.StatusOK, fmt.Sprintf("VM: %s has sucessfully reset to initial status.", vmName))
+}
