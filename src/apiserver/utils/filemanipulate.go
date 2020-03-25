@@ -23,7 +23,7 @@ func FileNameWithoutExt(fileName string) string {
 }
 
 func FileExists(fullFilePath string) (exists bool) {
-	if _, err := os.Stat(fullFilePath); os.IsExist(err) {
+	if _, err := os.Stat(fullFilePath); !os.IsNotExist(err) {
 		exists = true
 	}
 	return
