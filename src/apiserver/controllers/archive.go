@@ -53,6 +53,10 @@ func (ac *ArchiveController) Upload() {
 	}
 }
 
+func resetVMPackageStatus() {
+
+}
+
 // @Title Download archive
 // @Description Download packaged VM box from ITP service.
 // @Param	access_token	query	string	false	"Optional access token."
@@ -80,8 +84,16 @@ func (ac *ArchiveController) Download() {
 		beego.Debug(fmt.Sprintf("Start packing VM: %s as box.", vmName))
 		go func() {
 			vmHandler.UpdateVMPackageStatus(vmName, models.Pending)
-			ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
-			services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
+			err := ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
+			if err != nil {
+				vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
+				ac.handleError(err)
+			}
+			err = services.SCPArtifacts(vmName, ac.Ctx.ResponseWriter)
+			if err != nil {
+				vmHandler.UpdateVMPackageStatus(vmName, models.Initial)
+				ac.handleError(err)
+			}
 			vmHandler.UpdateVMPackageStatus(vmName, models.Finished)
 		}()
 	case models.Finished:

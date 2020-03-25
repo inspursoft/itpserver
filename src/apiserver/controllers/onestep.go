@@ -25,9 +25,12 @@ type OneStepController struct {
 func (ic *OneStepController) Post() {
 	var oneStep models.OneStepInstallation
 	ic.loadRequestBody(&oneStep)
-	ic.proxiedRequest(http.MethodPost, oneStep.VMWithSpec, "VMController.CreateBySpec", "access_token", ic.GetString("access_token", ""))
-	ic.proxiedRequest(http.MethodPost, oneStep.PackageVO, "InstallationController.Post", ":vm_name", oneStep.VMWithSpec.Name, "access_token", ic.GetString("access_token", ""))
-	ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", oneStep.VMWithSpec.Name, "access_token", ic.GetString("access_token", ""))
+	err := ic.proxiedRequest(http.MethodPost, oneStep.VMWithSpec, "VMController.CreateBySpec", "access_token", ic.GetString("access_token", ""))
+	ic.handleError(err)
+	err = ic.proxiedRequest(http.MethodPost, oneStep.PackageVO, "InstallationController.Post", ":vm_name", oneStep.VMWithSpec.Name, "access_token", ic.GetString("access_token", ""))
+	ic.handleError(err)
+	err = ic.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", oneStep.VMWithSpec.Name, "access_token", ic.GetString("access_token", ""))
+	ic.handleError(err)
 }
 
 // @Title Post

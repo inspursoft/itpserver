@@ -127,19 +127,31 @@ func (bc *BaseController) resolveURL(targetURL string, values ...interface{}) st
 	return fmt.Sprintf("%s:%d%s", bc.Ctx.Input.Site(), bc.Ctx.Input.Port(), bc.URLFor(targetURL, values...))
 }
 
-func (bc *BaseController) proxiedRequest(method string, requestData interface{}, urlFor string, values ...interface{}) {
+func (bc *BaseController) proxiedRequest(method string, requestData interface{}, urlFor string, values ...interface{}) error {
 	requestBody, err := json.Marshal(requestData)
-	bc.handleError(err)
+	if err != nil {
+		return err
+	}
 	req, err := http.NewRequest(method, bc.resolveURL(urlFor, values...), bytes.NewBuffer(requestBody))
+	if err != nil {
+		return err
+	}
 	req.Header.Set("Authorization", bc.Ctx.Input.Header("Authorization"))
-	bc.handleError(err)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
 	beego.Debug("Finished to handle proxied request.")
 	if resp != nil {
-		io.Copy(bc.Ctx.ResponseWriter, resp.Body)
+		_, err = io.Copy(bc.Ctx.ResponseWriter, resp.Body)
+		if err != nil {
+			return err
+		}
 		bc.serveStatus(resp.StatusCode, "Finished handled proxied request.")
 	}
+	return nil
 }
 
 // @Title Get
