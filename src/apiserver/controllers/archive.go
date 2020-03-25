@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/astaxie/beego"
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 )
@@ -81,7 +80,7 @@ func (ac *ArchiveController) Download() {
 	case models.Pending:
 		ac.serveStatus(http.StatusOK, fmt.Sprintf("VM: %s is packing in progress, please wait.", vmName))
 	case models.Initial:
-		beego.Debug(fmt.Sprintf("Start packing VM: %s as box.", vmName))
+		ac.serveStatus(http.StatusOK, fmt.Sprintf("Start packing VM: %s as box.", vmName))
 		go func() {
 			vmHandler.UpdateVMPackageStatus(vmName, models.Pending)
 			err := ac.proxiedRequest(http.MethodPost, nil, "VMController.Package", ":vm_name", vmName, "access_token", ac.GetString("access_token", ""))
