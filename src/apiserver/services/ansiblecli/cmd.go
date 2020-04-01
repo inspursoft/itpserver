@@ -107,8 +107,7 @@ func (ac *ansibleCli) preExecution() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
-	targetPath := filepath.Join(ac.workPath, ac.pkg.Name)
-	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && sh prepare.sh", targetPath))
+	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && sh prepare.sh", ac.workPath))
 	if err != nil {
 		logs.Warning("No prepare.sh found while doing pre execution.")
 	}
