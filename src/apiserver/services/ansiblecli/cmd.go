@@ -95,7 +95,7 @@ func (ac *ansibleCli) unzipPackage() *ansibleCli {
 	if !ac.err.HasNoError() {
 		return ac
 	}
-	ac.pkg.SourceName = ac.pkg.Name + ac.pkg.Tag + ".zip"
+	ac.pkg.SourceName = ac.pkg.Name + ac.pkg.Tag
 	err := ac.sshClient.ExecuteCommand(fmt.Sprintf("cd %s && unzip -o %s", ac.workPath, ac.pkg.SourceName))
 	if err != nil {
 		ac.err.InternalError(err)
