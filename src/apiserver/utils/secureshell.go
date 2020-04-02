@@ -73,7 +73,8 @@ func (s *SecureShell) ExecuteCommand(cmd string) error {
 	log.Printf("Execute command: %s\n", cmd)
 	err = session.Start(cmd)
 	if err != nil {
-		return err
+		beego.Error(fmt.Sprintf("Error occurred when executing command: %s, error: %+v", cmd, err))
+		return nil
 	}
 	return session.Wait()
 }
