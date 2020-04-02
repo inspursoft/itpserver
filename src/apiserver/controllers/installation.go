@@ -7,6 +7,7 @@ import (
 	"github.com/inspursoft/itpserver/src/apiserver/models"
 	"github.com/inspursoft/itpserver/src/apiserver/services"
 	"github.com/inspursoft/itpserver/src/apiserver/services/ansiblecli"
+	"github.com/inspursoft/itpserver/src/apiserver/utils"
 )
 
 type InstallationController struct {
@@ -64,6 +65,8 @@ func (ic *InstallationController) Post() {
 	}
 	var pkg models.PackageVO
 	ic.loadRequestBody(&pkg)
+	pkg.SourceName = utils.FileNameWithoutExt(pkg.SourceName)
+
 	cli := ansiblecli.NewClient(vmWithSpec, pkg, ic.Ctx.ResponseWriter)
 
 	isConfigProvided, err := ic.GetInt("is_config_provided", 0)
