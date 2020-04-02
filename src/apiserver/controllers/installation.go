@@ -65,7 +65,7 @@ func (ic *InstallationController) Post() {
 	}
 	var pkg models.PackageVO
 	ic.loadRequestBody(&pkg)
-	pkg.SourceName = utils.FileNameWithoutExt(pkg.SourceName)
+	pkg.Name = utils.FileNameWithoutExt(pkg.Name)
 
 	cli := ansiblecli.NewClient(vmWithSpec, pkg, ic.Ctx.ResponseWriter)
 
