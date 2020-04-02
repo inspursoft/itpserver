@@ -73,10 +73,13 @@ func (s *SecureShell) ExecuteCommand(cmd string) error {
 	log.Printf("Execute command: %s\n", cmd)
 	err = session.Start(cmd)
 	if err != nil {
-		beego.Error(fmt.Sprintf("Error occurred when executing command: %s, error: %+v", cmd, err))
-		return nil
+		return err
 	}
-	return session.Wait()
+	err = session.Wait()
+	if err != nil {
+		beego.Error(fmt.Sprintf("Error occurred when executing command: %s, error: %+v", cmd, err))
+	}
+	return nil
 }
 
 func (s *SecureShell) SecureCopyData(fileName string, data []byte, destinationPath string) error {
